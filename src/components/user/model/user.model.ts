@@ -8,10 +8,13 @@ import {
   Unique,
   AutoIncrement,
   Length,
+  CreatedAt,
+  UpdatedAt,
+  DeletedAt,
 } from 'sequelize-typescript';
 
 @Table
-export class User extends Model<User> {
+export class UserModel extends Model<UserModel> {
   @AutoIncrement
   @PrimaryKey
   @Unique
@@ -38,6 +41,22 @@ export class User extends Model<User> {
   password: string;
 
   @AllowNull(false)
-  @Column(DataType.BOOLEAN)
-  userAgreement: boolean;
+  @CreatedAt
+  @Column(DataType.DATE)
+  createdAt: Date;
+
+  @AllowNull(true)
+  @CreatedAt
+  @Column(DataType.DATE)
+  acceptedTCAndPP: Date;
+
+  @AllowNull(true)
+  @UpdatedAt
+  @Column(DataType.DATE)
+  updatedAt: Date;
+
+  @AllowNull(true)
+  @DeletedAt
+  @Column(DataType.DATE)
+  deletedAt: Date;
 }
