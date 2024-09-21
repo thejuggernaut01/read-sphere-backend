@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { UserModel } from './model/user.model';
 import { Transaction } from 'sequelize';
-import { CreateUserDto } from './dto/create-user.dto';
+import { CreateUserDto } from '../auth/dto/auth.dto';
 
 @Injectable()
 export class UserService {

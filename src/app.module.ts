@@ -6,13 +6,15 @@ import { SequelizeModule } from '@nestjs/sequelize';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_PIPE } from '@nestjs/core';
 import { LoggerModule } from 'nestjs-pino';
+import { AuthModule } from './components/auth/auth.module';
+import { ENVIRONMENT } from './common/config/environment';
 
 @Module({
   imports: [
     // dotenv configuration
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: `.env.${process.env.NODE_ENV}` as string,
+      envFilePath: `.env.${ENVIRONMENT.APP.ENV}` as string,
     }),
 
     // Logger configuration using pino
@@ -47,6 +49,7 @@ import { LoggerModule } from 'nestjs-pino';
       },
     }),
     UserModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [
