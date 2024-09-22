@@ -11,13 +11,13 @@ export class BaseHelper {
     return bycrpt.compare(data, hashed);
   }
 
-  static jwtAccessToken(payload: { id: string }) {
+  static jwtAccessToken(payload: string) {
     return jwt.sign(payload, ENVIRONMENT.JWT.ACCESS_TOKEN, {
       expiresIn: ENVIRONMENT.JWT.ACCESS_TOKEN_EXPIRES_IN,
     });
   }
 
-  static jwtRefreshToken(payload: { id: string }) {
+  static jwtRefreshToken(payload: string) {
     return jwt.sign(payload, ENVIRONMENT.JWT.REFRESH_TOKEN, {
       expiresIn: ENVIRONMENT.JWT.REFRESH_TOKEN_EXPIRES_IN,
     });

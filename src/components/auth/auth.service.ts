@@ -1,6 +1,10 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { UserService } from '../user/user.service';
-import { CreateUserDto } from './dto/auth.dto';
+import { CreateUserDto, LoginDto } from './dto/auth.dto';
 import { BaseHelper } from 'src/common/utils/helper.utils';
 
 @Injectable()
@@ -30,7 +34,29 @@ export class AuthService {
     }
   }
 
-  async login() {}
+  async login(payload: LoginDto) {
+    try {
+      const user = await this.usersService.findUserByEmail(payload.email);
+
+      const match = await BaseHelper.compareHashedData(
+        payload.password,
+        user.password,
+      );
+
+      if (!match) {
+        throw new NotFoundException('Email or password incorrect.');
+      }
+
+      const accessToken = BaseHelper.jwtAccessToken(user.email);
+      const refreshToken = BaseHelper.jwtRefreshToken(user.email);
+
+      await this.usersService.updateUserRefreshToken(user.email, refreshToken);
+
+      return { ...user, accessToken };
+    } catch (error) {
+      console.error('Error while logging user in', error);
+    }
+  }
 
   async logout() {}
 

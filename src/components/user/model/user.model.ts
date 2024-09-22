@@ -43,12 +43,16 @@ export class UserModel extends Model<UserModel> {
   @AllowNull(false)
   @CreatedAt
   @Column(DataType.DATE)
-  createdAt: Date;
+  acceptedTCAndPP: Date;
 
   @AllowNull(true)
+  @Column(DataType.STRING)
+  refreshToken: string;
+
+  @AllowNull(false)
   @CreatedAt
   @Column(DataType.DATE)
-  acceptedTCAndPP: Date;
+  createdAt: Date;
 
   @AllowNull(true)
   @UpdatedAt

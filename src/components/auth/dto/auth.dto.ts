@@ -3,6 +3,7 @@ import {
   IsEmail,
   IsNotEmpty,
   IsNumber,
+  IsOptional,
   IsString,
   MaxLength,
   MinLength,
@@ -36,6 +37,24 @@ export class CreateUserDto {
   @IsDate()
   @IsNotEmpty()
   acceptedTCAndPP: Date;
+}
+
+export class UpdateUserDto {
+  @IsString()
+  @IsOptional()
+  firstName: string;
+
+  @IsString()
+  @IsOptional()
+  lastName: string;
+
+  @IsEmail()
+  @IsOptional()
+  email: string;
+
+  @IsString()
+  @IsOptional()
+  refreshToken: string;
 }
 
 export class LoginDto {

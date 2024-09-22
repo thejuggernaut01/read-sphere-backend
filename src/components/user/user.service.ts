@@ -35,10 +35,16 @@ export class UserService {
     return user;
   }
 
-  async updateUser(email: string) {
-    const user = await this.findUserByEmail(email);
+  async updateUserRefreshToken(email: string, payload: string) {
+    try {
+      const user = await this.findUserByEmail(email);
 
-    await user.update({ email });
+      await user.update({ refreshToken: payload });
+
+      return user;
+    } catch (error) {
+      throw error;
+    }
   }
 
   async deleteUser(email: string) {
