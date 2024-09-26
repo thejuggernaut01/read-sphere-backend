@@ -58,7 +58,7 @@ export class AuthService {
     }
   }
 
-  async logout() {}
-
   async sendVerificationEmail() {}
+
+  async logout() {}
 }

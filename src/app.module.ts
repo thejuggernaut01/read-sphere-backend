@@ -8,6 +8,7 @@ import { APP_PIPE } from '@nestjs/core';
 import { LoggerModule } from 'nestjs-pino';
 import { AuthModule } from './components/auth/auth.module';
 import { ENVIRONMENT } from './common/config/environment';
+import { BookModule } from './components/book/book.module';
 
 @Module({
   imports: [
@@ -50,6 +51,7 @@ import { ENVIRONMENT } from './common/config/environment';
     }),
     UserModule,
     AuthModule,
+    BookModule,
   ],
   controllers: [AppController],
   providers: [
