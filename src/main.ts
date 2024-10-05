@@ -3,6 +3,7 @@ import { AppModule } from './app.module';
 import { Logger, LoggerErrorInterceptor } from 'nestjs-pino';
 import * as express from 'express';
 import helmet from 'helmet';
+import hpp from 'hpp';
 import { ENVIRONMENT } from './common/config/environment';
 
 async function bootstrap() {
@@ -15,6 +16,8 @@ async function bootstrap() {
   });
 
   app.use(helmet());
+  app.use(hpp());
+
   app.use(express.json({ limit: '50mb' }));
   app.use(express.urlencoded({ limit: '50mb', extended: true }));
 

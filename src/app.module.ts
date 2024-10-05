@@ -39,7 +39,7 @@ import { BookModule } from './components/book/book.module';
       useFactory: (config: ConfigService) => {
         return {
           dialect: 'postgres',
-          host: 'localhost',
+          host: config.get<string>('DB_HOST'),
           port: config.get<number>('DB_PORT'),
           username: config.get<string>('DB_USERNAME'),
           password: config.get<string>('DB_PASSWORD'),
