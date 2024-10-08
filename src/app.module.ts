@@ -37,6 +37,8 @@ import { BookModule } from './components/book/book.module';
     SequelizeModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (config: ConfigService) => {
+        const isProduction = config.get<string>('NODE_ENV') === 'production';
+
         return {
           dialect: 'postgres',
           host: config.get<string>('DB_HOST'),
@@ -45,7 +47,12 @@ import { BookModule } from './components/book/book.module';
           password: config.get<string>('DB_PASSWORD'),
           database: config.get<string>('DB_NAME'),
           autoLoadModels: true, // Automatically load all models registered with SequelizeModule.forFeature
-          synchronize: true,
+          synchronize: !isProduction,
+          logging: !isProduction,
+          ssl: false,
+          dialectOptions: {
+            ssl: false,
+          },
         };
       },
     }),
