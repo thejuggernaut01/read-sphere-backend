@@ -49,9 +49,10 @@ import { BookModule } from './components/book/book.module';
           autoLoadModels: true, // Automatically load all models registered with SequelizeModule.forFeature
           synchronize: !isProduction,
           logging: !isProduction,
-          ssl: false,
+          ssl: true,
           dialectOptions: {
-            ssl: false,
+            ssl: true,
+            rejectUnauthorized: false,
           },
         };
       },

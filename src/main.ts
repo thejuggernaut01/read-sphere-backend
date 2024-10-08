@@ -25,6 +25,6 @@ async function bootstrap() {
   app.useLogger(app.get(Logger));
   // Expose all error including error message, stack trace, etc.
   app.useGlobalInterceptors(new LoggerErrorInterceptor());
-  await app.listen(ENVIRONMENT.APP.PORT);
+  await app.listen(ENVIRONMENT.APP.PORT || 4000);
 }
 bootstrap();
