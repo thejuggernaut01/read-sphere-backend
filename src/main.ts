@@ -3,7 +3,7 @@ import { AppModule } from './app.module';
 import { Logger, LoggerErrorInterceptor } from 'nestjs-pino';
 import * as express from 'express';
 import helmet from 'helmet';
-import hpp from 'hpp';
+import * as hpp from 'hpp';
 import { ENVIRONMENT } from './common/config/environment';
 
 async function bootstrap() {
@@ -25,6 +25,6 @@ async function bootstrap() {
   app.useLogger(app.get(Logger));
   // Expose all error including error message, stack trace, etc.
   app.useGlobalInterceptors(new LoggerErrorInterceptor());
-  await app.listen(ENVIRONMENT.APP.PORT || 4000);
+  await app.listen(ENVIRONMENT.APP.PORT);
 }
 bootstrap();

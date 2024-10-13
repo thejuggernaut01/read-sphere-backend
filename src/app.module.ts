@@ -9,6 +9,7 @@ import { LoggerModule } from 'nestjs-pino';
 import { AuthModule } from './components/auth/auth.module';
 import { ENVIRONMENT } from './common/config/environment';
 import { BookModule } from './components/book/book.module';
+import { Dialect } from 'sequelize';
 
 @Module({
   imports: [
@@ -32,23 +33,20 @@ import { BookModule } from './components/book/book.module';
         },
       },
     }),
-
-    // Database configuration
     SequelizeModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (config: ConfigService) => {
         const isProduction = config.get<string>('NODE_ENV') === 'production';
-
         return {
-          dialect: 'postgres',
+          dialect: 'postgres' as Dialect,
           host: config.get<string>('DB_HOST'),
-          port: config.get<number>('DB_PORT'),
+          port: config.get<number>('DB_PORT') || 5432,
+          database: config.get<string>('DB_NAME'),
           username: config.get<string>('DB_USERNAME'),
           password: config.get<string>('DB_PASSWORD'),
-          database: config.get<string>('DB_NAME'),
-          autoLoadModels: true, // Automatically load all models registered with SequelizeModule.forFeature
+          autoLoadModels: true,
           synchronize: !isProduction,
-          logging: !isProduction,
+          logging: false,
           ssl: true,
           dialectOptions: {
             ssl: true,

@@ -1,3 +1,6 @@
+import * as dotenv from 'dotenv';
+dotenv.config();
+
 interface IEnvironment {
   APP: {
     NAME: string;
@@ -8,6 +11,7 @@ interface IEnvironment {
     USERNAME: string;
     PASSWORD: string;
     NAME: string;
+    HOST: string;
     PORT: number;
   };
   JWT: {
@@ -21,13 +25,14 @@ interface IEnvironment {
 export const ENVIRONMENT: IEnvironment = {
   APP: {
     NAME: process.env.APP_NAME,
-    PORT: Number(process.env.PORT || process.env.APP_PORT || 3000),
+    PORT: Number(process.env.PORT || process.env.APP_PORT || 4000),
     ENV: process.env.NODE_ENV,
   },
   DB: {
     USERNAME: process.env.DB_USERNAME,
     PASSWORD: process.env.DB_PASSWORD,
     NAME: process.env.DB_NAME,
+    HOST: process.env.DB_HOST,
     PORT: Number(process.env.DB_PORT),
   },
   JWT: {
