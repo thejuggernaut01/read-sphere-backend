@@ -2,7 +2,7 @@ import {
   IsDate,
   IsEmail,
   IsNotEmpty,
-  IsNumber,
+  IsInt,
   IsOptional,
   IsString,
   MaxLength,
@@ -59,34 +59,38 @@ export class UpdateUserDto {
 
 export class LoginDto {
   @IsEmail()
+  @IsNotEmpty()
   email: string;
 
   @IsString()
+  @IsNotEmpty()
   password: string;
 }
 
 export class VerifyEmailDto {
   @IsEmail()
+  @IsNotEmpty()
   email: string;
 
-  @IsNumber()
+  @IsInt()
+  @IsNotEmpty()
   code: number;
 }
 
-export class RequestVerifyEmailOtpDto {
+export class ResendVerifyEmailDto {
   @IsEmail()
+  @IsNotEmpty()
   email: string;
 }
 
 export class ForgotPasswordDto {
   @IsEmail()
+  @IsNotEmpty()
   email: string;
 }
 
-export class ResetPasswordDto extends LoginDto {
-  @IsNumber()
-  code: number;
-
+export class ResetPasswordDto {
   @IsString()
-  confirmPassword: string;
+  @IsNotEmpty()
+  password: string;
 }

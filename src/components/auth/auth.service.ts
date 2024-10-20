@@ -1,24 +1,39 @@
 import {
   ConflictException,
   Injectable,
+  InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
 import { UserService } from '../user/user.service';
-import { CreateUserDto, LoginDto } from './dto/auth.dto';
-import { BaseHelper } from 'src/common/utils/helper.utils';
+import {
+  ICreateUser,
+  ILogin,
+  IVerifyEmail,
+  IResendVerifyEmail,
+  IForgotPassword,
+  IResetPassword,
+} from './types/auth.types';
+import { BaseHelper } from '../../common/utils/helper.utils';
+import { ERROR_CONSTANT } from '../../common/constants/error.constant';
+import { MailService } from '../mail/mail.service';
+import { OtpService } from '../otp/otp.service';
 
 @Injectable()
 export class AuthService {
-  constructor(private usersService: UserService) {}
+  constructor(
+    private usersService: UserService,
+    private mailService: MailService,
+    private otpService: OtpService,
+  ) {}
 
-  async signup(payload: CreateUserDto) {
+  async signup(payload: ICreateUser) {
     try {
       const existingUser = await this.usersService.findUserByEmail(
         payload.email,
       );
 
       if (existingUser) {
-        throw new ConflictException('User already exists');
+        throw new ConflictException(ERROR_CONSTANT.AUTH.USER_EXISTS);
       }
 
       const hashedPassword = await BaseHelper.hashData(payload.password);
@@ -28,23 +43,32 @@ export class AuthService {
         password: hashedPassword,
       });
 
-      return user;
+      const code = await this.otpService.createOtp(user.id);
+
+      await this.mailService.sendVerificationEmail('Verify your email', code, {
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+      });
     } catch (error) {
       console.error('Error while creating user', error);
+      throw new InternalServerErrorException(
+        ERROR_CONSTANT.GENERAL.SERVER_ERROR,
+      );
     }
   }
 
-  async login(payload: LoginDto) {
+  async login(payload: ILogin) {
     try {
       const user = await this.usersService.findUserByEmail(payload.email);
 
-      const match = await BaseHelper.compareHashedData(
+      const isPasswordValid = await BaseHelper.compareHashedData(
         payload.password,
         user.password,
       );
 
-      if (!match) {
-        throw new NotFoundException('Email or password incorrect.');
+      if (!isPasswordValid) {
+        throw new NotFoundException(ERROR_CONSTANT.AUTH.LOGIN_FAILED);
       }
 
       const accessToken = BaseHelper.jwtAccessToken(user.email);
@@ -55,10 +79,88 @@ export class AuthService {
       return { ...user, accessToken };
     } catch (error) {
       console.error('Error while logging user in', error);
+      throw new InternalServerErrorException(
+        ERROR_CONSTANT.GENERAL.SERVER_ERROR,
+      );
     }
   }
 
-  async sendVerificationEmail() {}
+  async verifyEmail(payload: IVerifyEmail) {
+    try {
+      const user = await this.usersService.findUserByEmail(payload.email);
 
-  async logout() {}
+      await this.otpService.verifyOTP({
+        userId: user.id,
+        code: payload.code,
+      });
+
+      // Update the user's email verification status
+      user.emailVerified = true;
+      await user.save();
+
+      await this.mailService.sendWelcomeEmail('Welcome to Read Sphere', {
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+      });
+    } catch (error) {
+      console.error('Error while verifying user', error);
+      throw new InternalServerErrorException(
+        ERROR_CONSTANT.GENERAL.SERVER_ERROR,
+      );
+    }
+  }
+
+  async resendVerifyEmail(payload: IResendVerifyEmail) {
+    try {
+      const user = await this.usersService.findUserByEmail(payload.email);
+
+      const code = await this.otpService.createOtp(user.id);
+
+      await this.mailService.sendVerificationEmail('Verify your email', code, {
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+      });
+    } catch (error) {
+      console.error('Error while resending verification email', error);
+      throw new InternalServerErrorException(
+        ERROR_CONSTANT.GENERAL.SERVER_ERROR,
+      );
+    }
+  }
+
+  async forgotPassword(payload: IForgotPassword) {
+    try {
+      const user = await this.usersService.findUserByEmail(payload.email);
+
+      const code = await this.otpService.createOtp(user.id);
+
+      await this.mailService.sendForgotPasswordEmail(
+        'Reset your Read Sphere account password',
+        code,
+        {
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+        },
+      );
+    } catch (error) {
+      console.error('Error while sending reset password email', error);
+      throw new InternalServerErrorException(
+        ERROR_CONSTANT.GENERAL.SERVER_ERROR,
+      );
+    }
+  }
+
+  async resetPassword(payload: IResetPassword) {
+    const { token, password } = payload;
+
+    const hashedPassword = await BaseHelper.hashData(password);
+
+    await this.usersService.findAndUpdateUserByResetToken(
+      token,
+      hashedPassword,
+    );
+  }
 }

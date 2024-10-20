@@ -1,6 +1,8 @@
 import bycrpt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { ENVIRONMENT } from '../config/environment';
+import { randomBytes } from 'crypto';
+import { BadRequestException } from '@nestjs/common';
 
 export class BaseHelper {
   static hashData(data: string): Promise<string> {
@@ -10,6 +12,34 @@ export class BaseHelper {
   static compareHashedData(data: string, hashed: string): Promise<boolean> {
     return bycrpt.compare(data, hashed);
   }
+
+  static generateRandomString(length = 8) {
+    return randomBytes(length).toString('hex');
+  }
+
+  static generateOTP(): number {
+    return Math.floor(Math.random() * (999999 - 100000 + 1)) + 100000;
+  }
+
+  static isValidFileNameAwsUpload = (fileName: string) => {
+    const regex = /^[a-zA-Z0-9_\-/]+\/[a-zA-Z0-9_\-]+(?:\.(jpg|png|jpeg))$/;
+    return regex.test(fileName);
+  };
+
+  static generateFileName(folderName = 'uploads', mimetype: string) {
+    const timeStampInMilliSeconds = Date.now();
+    const randomString = crypto.randomUUID();
+
+    return `${folderName}/${randomString}-${timeStampInMilliSeconds}.${mimetype.split('/')[1]}`;
+  }
+
+  static validateFileMimeType = (mimetype: string) => {
+    const validImageMimeTypes = ['image/png', 'image/jpg', 'image/jpeg'];
+
+    if (!validImageMimeTypes.includes(mimetype)) {
+      throw new BadRequestException('Invalid image');
+    }
+  };
 
   static jwtAccessToken(payload: string) {
     return jwt.sign(payload, ENVIRONMENT.JWT.ACCESS_TOKEN, {
