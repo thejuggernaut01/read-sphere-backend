@@ -8,5 +8,6 @@ import { OTPModel } from './model/otp.model';
   imports: [SequelizeModule.forFeature([OTPModel])],
   controllers: [OtpController],
   providers: [OtpService],
+  exports: [OtpService],
 })
 export class OtpModule {}
