@@ -1,7 +1,7 @@
 import {
   Injectable,
   InternalServerErrorException,
-  BadRequestException,
+  NotFoundException,
 } from '@nestjs/common';
 import { OTPModel } from './model/otp.model';
 import { InjectModel } from '@nestjs/sequelize';
@@ -33,7 +33,7 @@ export class OtpService {
 
       return userOtp.code;
     } catch (otpError) {
-      console.error('Error while saving OTP to database', otpError);
+      console.error('Error while creating OTP', otpError);
       throw new InternalServerErrorException(
         ERROR_CONSTANT.GENERAL.SERVER_ERROR,
       );
@@ -57,7 +57,7 @@ export class OtpService {
       });
 
       if (!otpRecord) {
-        throw new BadRequestException(ERROR_CONSTANT.OTP.INVALID);
+        throw new NotFoundException(ERROR_CONSTANT.OTP.INVALID);
       }
 
       // Mark OTP as verified

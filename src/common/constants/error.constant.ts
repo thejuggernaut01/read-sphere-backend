@@ -13,7 +13,6 @@ export const ERROR_CONSTANT = {
     ACCOUNT_LOCKED: 'Account is locked, please contact support',
     UNAUTHORIZED: 'Unauthorized access, please log in',
     USER_EXISTS: 'User already exists.',
-    USER_NOT_FOUND: 'User not found.',
   },
   OTP: {
     INVALID: 'Invalid OTP, please try again',

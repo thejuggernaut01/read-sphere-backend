@@ -2,7 +2,6 @@ import {
   Injectable,
   InternalServerErrorException,
   NotFoundException,
-  BadRequestException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { UserModel } from './model/user.model';
@@ -37,12 +36,9 @@ export class UserService {
 
   async findUserByEmail(email: string) {
     try {
-      if (!email) return null;
-
       const user = await this.userModel.findOne({ where: { email } });
 
-      if (!user)
-        throw new NotFoundException(ERROR_CONSTANT.AUTH.USER_NOT_FOUND);
+      if (!user) throw new NotFoundException(ERROR_CONSTANT.AUTH.LOGIN_FAILED);
 
       return user;
     } catch (error) {
@@ -65,7 +61,7 @@ export class UserService {
       });
 
       if (!user) {
-        throw new BadRequestException(ERROR_CONSTANT.GENERAL.TOKEN);
+        throw new NotFoundException(ERROR_CONSTANT.GENERAL.TOKEN);
       }
 
       await user.update({
