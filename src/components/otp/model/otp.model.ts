@@ -19,7 +19,7 @@ export class OTPModel extends Model<OTPModel> {
   userId: number;
 
   @Index
-  @Column(DataType.NUMBER)
+  @Column(DataType.INTEGER)
   code: number;
 
   @Column(DataType.DATE)
