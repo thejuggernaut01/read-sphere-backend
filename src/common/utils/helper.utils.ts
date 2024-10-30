@@ -3,6 +3,7 @@ import jwt from 'jsonwebtoken';
 import { ENVIRONMENT } from '../config/environment';
 import { randomBytes } from 'crypto';
 import { BadRequestException } from '@nestjs/common';
+import { CookieOptions, Response } from 'express';
 
 export class BaseHelper {
   static hashData(data: string): Promise<string> {
@@ -41,14 +42,14 @@ export class BaseHelper {
     }
   };
 
-  static jwtAccessToken(payload: string) {
-    return jwt.sign(payload, ENVIRONMENT.JWT.ACCESS_TOKEN, {
+  static generateJwtAccessToken(userId: string) {
+    return jwt.sign({ userId }, ENVIRONMENT.JWT.ACCESS_TOKEN, {
       expiresIn: ENVIRONMENT.JWT.ACCESS_TOKEN_EXPIRES_IN,
     });
   }
 
-  static jwtRefreshToken(payload: string) {
-    return jwt.sign(payload, ENVIRONMENT.JWT.REFRESH_TOKEN, {
+  static generateJwtRefreshToken(userId: string) {
+    return jwt.sign({ userId }, ENVIRONMENT.JWT.REFRESH_TOKEN, {
       expiresIn: ENVIRONMENT.JWT.REFRESH_TOKEN_EXPIRES_IN,
     });
   }
@@ -59,5 +60,20 @@ export class BaseHelper {
 
   static verifyJwtRefreshToken(token: string) {
     return jwt.verify(token, ENVIRONMENT.JWT.REFRESH_TOKEN);
+  }
+
+  static setCookie(
+    res: Response,
+    name: string,
+    value: string | number,
+    options: CookieOptions = {},
+  ) {
+    res.cookie(name, value, {
+      httpOnly: true,
+      secure: ENVIRONMENT.APP.ENV === 'production',
+      path: '/',
+      sameSite: 'none',
+      ...options,
+    });
   }
 }

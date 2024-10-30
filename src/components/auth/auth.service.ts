@@ -71,8 +71,8 @@ export class AuthService {
         throw new NotFoundException(ERROR_CONSTANT.AUTH.LOGIN_FAILED);
       }
 
-      const accessToken = BaseHelper.jwtAccessToken(user.email);
-      const refreshToken = BaseHelper.jwtRefreshToken(user.email);
+      const accessToken = BaseHelper.generateJwtAccessToken(user.id);
+      const refreshToken = BaseHelper.generateJwtRefreshToken(user.id);
 
       await this.usersService.updateUserRefreshToken(user.email, refreshToken);
 

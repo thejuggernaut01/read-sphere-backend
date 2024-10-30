@@ -16,7 +16,7 @@ export class CreateOtpDto {
 
 export class ValidateOtpDto {
   @IsInt()
-  userId: number;
+  userId: string;
 
   @IsInt()
   code: number;

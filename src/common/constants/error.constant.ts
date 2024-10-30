@@ -13,6 +13,7 @@ export const ERROR_CONSTANT = {
     ACCOUNT_LOCKED: 'Account is locked, please contact support',
     UNAUTHORIZED: 'Unauthorized access, please log in',
     USER_EXISTS: 'User already exists.',
+    EXPIRED_SESSION: 'Session expired. Please log in again.',
   },
   OTP: {
     INVALID: 'Invalid OTP, please try again',
@@ -23,6 +24,7 @@ export const ERROR_CONSTANT = {
     GET_CURRENT_USER_FAILED: 'Failed to retrieve user data',
     UPDATE_USER_PROFILE_FAILED: 'Failed to update profile, please try again',
     DELETE_USER_FAILED: 'Failed to delete user, please try again',
+    NOT_FOUND: 'User not found',
   },
   BOOK: {
     ADD_BOOK_FAILED: 'Failed to add book to your collection, please try again',
@@ -65,7 +67,8 @@ export const ERROR_CONSTANT = {
     BAD_REQUEST: 'Bad request, please check your input',
     CONFLICT: 'Conflict, the request could not be completed',
     RATE_LIMIT: 'Too many requests, please try again later',
-    TOKEN: 'Invalid or expired reset token',
+    TOKEN: 'Invalid or expired token',
+    ERROR: 'An error occurred, please log in again',
   },
   EMAIL: {
     FAILED_TO_SEND: 'Failed to send the email. Please try again later.',

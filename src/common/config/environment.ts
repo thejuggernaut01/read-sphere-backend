@@ -27,23 +27,17 @@ interface IEnvironment {
   };
 }
 
-const isProduction = process.env.NODE_ENV === 'production';
-
 export const ENVIRONMENT: IEnvironment = {
   APP: {
     NAME: process.env.APP_NAME,
-    PORT: Number(process.env.PORT || process.env.APP_PORT || 4000),
+    PORT: Number(process.env.PORT || process.env.APP_PORT || 4001),
     ENV: process.env.NODE_ENV,
   },
   DB: {
-    USERNAME: isProduction
-      ? process.env.PROD_DB_USERNAME
-      : process.env.DEV_DB_USERNAME,
-    PASSWORD: isProduction
-      ? process.env.PROD_DB_PASSWORD
-      : process.env.DEV_DB_PASSWORD,
-    NAME: isProduction ? process.env.PROD_DB_USERNAME : process.env.DEV_DB_NAME,
-    HOST: isProduction ? process.env.PROD_DB_HOST : process.env.DEV_DB_HOST,
+    USERNAME: process.env.DB_USERNAME,
+    PASSWORD: process.env.DB_PASSWORD,
+    NAME: process.env.DB_NAME,
+    HOST: process.env.DB_HOST,
     PORT: Number(process.env.DB_PORT),
   },
   JWT: {
@@ -58,3 +52,5 @@ export const ENVIRONMENT: IEnvironment = {
     PROJECT_SECRETS: process.env.SMTP_PROJECT_SECRETS,
   },
 };
+
+export const isProduction = ENVIRONMENT.APP.ENV === 'production';

@@ -48,6 +48,7 @@ import { MailModule } from './components/mail/mail.module';
       provide: APP_PIPE,
       useValue: new ValidationPipe({
         whitelist: true,
+        forbidNonWhitelisted: true,
       }),
     },
   ],

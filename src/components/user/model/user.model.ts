@@ -21,8 +21,8 @@ export class UserModel extends Model<UserModel> {
   @AutoIncrement
   @PrimaryKey
   @AllowNull(false)
-  @Column(DataType.INTEGER)
-  id: number;
+  @Column(DataType.STRING)
+  id: string;
 
   @AllowNull(false)
   @Length({ min: 2, max: 50 })

@@ -34,6 +34,10 @@ export class UserService {
     }
   }
 
+  async findUserById(userId: string) {
+    return this.userModel.findByPk(userId);
+  }
+
   async findUserByEmail(email: string) {
     try {
       const user = await this.userModel.findOne({ where: { email } });

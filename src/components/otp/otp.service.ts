@@ -17,7 +17,7 @@ export class OtpService {
     private readonly otpModel: typeof OTPModel,
   ) {}
 
-  async createOtp(userId: number) {
+  async createOtp(userId: string) {
     try {
       const code = BaseHelper.generateOTP();
       const expiresAt = new Date(Date.now() + 15 * 60 * 1000);
