@@ -15,8 +15,8 @@ import { UserModel } from '../../../components/user/model/user.model';
 })
 export class OTPModel extends Model<OTPModel> {
   @ForeignKey(() => UserModel)
-  @Column(DataType.STRING)
-  userId: string;
+  @Column(DataType.INTEGER)
+  userId: number;
 
   @Index
   @Column(DataType.INTEGER)

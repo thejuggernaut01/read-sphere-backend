@@ -42,13 +42,13 @@ export class BaseHelper {
     }
   };
 
-  static generateJwtAccessToken(userId: string) {
+  static generateJwtAccessToken(userId: number) {
     return jwt.sign({ userId }, ENVIRONMENT.JWT.ACCESS_TOKEN, {
       expiresIn: ENVIRONMENT.JWT.ACCESS_TOKEN_EXPIRES_IN,
     });
   }
 
-  static generateJwtRefreshToken(userId: string) {
+  static generateJwtRefreshToken(userId: number) {
     return jwt.sign({ userId }, ENVIRONMENT.JWT.REFRESH_TOKEN, {
       expiresIn: ENVIRONMENT.JWT.REFRESH_TOKEN_EXPIRES_IN,
     });

@@ -34,7 +34,7 @@ export class UserService {
     }
   }
 
-  async findUserById(userId: string) {
+  async findUserById(userId: number) {
     return this.userModel.findByPk(userId);
   }
 

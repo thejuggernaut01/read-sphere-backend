@@ -49,6 +49,7 @@ import { MailModule } from './components/mail/mail.module';
       useValue: new ValidationPipe({
         whitelist: true,
         forbidNonWhitelisted: true,
+        transform: true,
       }),
     },
   ],

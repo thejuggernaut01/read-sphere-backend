@@ -16,7 +16,6 @@ export class AuthGuard implements CanActivate {
   constructor(private readonly userService: UserService) {}
 
   // Improve auth to factor in reactive streams and real-time data environments
-
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request: Request = context.switchToHttp().getRequest();
     const response: Response = context.switchToHttp().getResponse();
@@ -31,7 +30,7 @@ export class AuthGuard implements CanActivate {
     }
 
     // Verify user access
-    const handleUserVerification = async (decoded: string) => {
+    const handleUserVerification = async (decoded: number) => {
       const user = await this.userService.findUserById(decoded);
 
       // Check if user doesn't exist
@@ -59,7 +58,7 @@ export class AuthGuard implements CanActivate {
           refreshToken,
         ) as string;
 
-        const currentUser = await handleUserVerification(decodeRefreshToken);
+        const currentUser = await handleUserVerification(+decodeRefreshToken);
 
         // generate access token
         const accessToken = BaseHelper.generateJwtAccessToken(currentUser.id);
@@ -78,7 +77,6 @@ export class AuthGuard implements CanActivate {
       if (!accessToken) {
         // if access token is not present,
         // verify the refresh token, generate and set new access token
-
         const { accessToken, currentUser } = await generateAccessToken();
 
         // Set access token
@@ -93,7 +91,7 @@ export class AuthGuard implements CanActivate {
           accessToken,
         ) as string;
 
-        const currentUser = await handleUserVerification(decodeAccessToken);
+        const currentUser = await handleUserVerification(+decodeAccessToken);
 
         // add current user to request object
         request.currentUser = currentUser.id;

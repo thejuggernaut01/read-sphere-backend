@@ -3,7 +3,7 @@ export interface ICreateUser {
   lastName: string;
   email: string;
   password: string;
-  acceptedTCAndPP: Date;
+  acceptedTCAndPP: string;
 }
 
 export interface IUpdateUser {

@@ -13,7 +13,7 @@ import { UserDto } from '../user/dto/user.dto';
 import { ResponseMessage } from '../../common/decorator/response.decorator';
 import { RESPONSE_CONSTANT } from '../../common/constants/response.constant';
 import { Response } from 'express';
-import { isProduction } from '../../common/config/environment';
+import { BaseHelper } from 'src/common/utils/helper.utils';
 
 @Controller('auth')
 @SerializeResponse(UserDto)
@@ -31,12 +31,12 @@ export class AuthController {
   async login(@Body() body: LoginDto, @Res() res: Response) {
     const user = await this.authService.login(body);
 
-    // Set the refresh-token cookie
-    res.cookie('readsphere-token', user.refreshToken, {
-      secure: isProduction,
-      httpOnly: true,
-      path: '/',
-      sameSite: 'none',
+    // Set the refresh and access token cookie
+    BaseHelper.setCookie(res, 'readsphere-access-token', user.accessToken, {
+      maxAge: 15 * 60 * 1000, // 15 minutes
+    });
+
+    BaseHelper.setCookie(res, 'readsphere-refresh-token', user.refreshToken, {
       maxAge: 30 * 24 * 60 * 60 * 1000,
     });
 

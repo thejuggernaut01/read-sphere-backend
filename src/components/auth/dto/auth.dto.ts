@@ -36,7 +36,7 @@ export class CreateUserDto {
 
   @IsDate()
   @IsNotEmpty()
-  acceptedTCAndPP: Date;
+  acceptedTCAndPP: string;
 }
 
 export class UpdateUserDto {
