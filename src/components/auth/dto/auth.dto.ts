@@ -1,3 +1,4 @@
+import { Type } from 'class-transformer';
 import {
   IsDate,
   IsEmail,
@@ -12,19 +13,19 @@ import {
 export class CreateUserDto {
   @IsString()
   @IsNotEmpty({
-    message: 'Enter your first name',
+    message: 'First name is required',
   })
   firstName: string;
 
   @IsString()
   @IsNotEmpty({
-    message: 'Enter your last name',
+    message: 'Last name is required',
   })
   lastName: string;
 
   @IsEmail()
   @IsNotEmpty({
-    message: 'Enter a valid email address',
+    message: 'Email address is required',
   })
   email: string;
 
@@ -34,9 +35,12 @@ export class CreateUserDto {
   @MaxLength(20)
   password: string;
 
-  @IsDate()
-  @IsNotEmpty()
-  acceptedTCAndPP: string;
+  @IsDate({
+    message: 'termsAcceptedAt must be a valid date or date string',
+  })
+  @IsNotEmpty({ message: 'termsAcceptedAt is required' })
+  @Type(() => Date)
+  termsAcceptedAt: Date;
 }
 
 export class UpdateUserDto {

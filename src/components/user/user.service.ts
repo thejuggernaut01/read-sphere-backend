@@ -39,75 +39,51 @@ export class UserService {
   }
 
   async findUserByEmail(email: string) {
-    try {
-      const user = await this.userModel.findOne({ where: { email } });
-
-      if (!user) throw new NotFoundException(ERROR_CONSTANT.AUTH.LOGIN_FAILED);
-
-      return user;
-    } catch (error) {
-      console.error('Error while retrieving user data:', error);
-      throw new InternalServerErrorException(
-        ERROR_CONSTANT.USER.GET_CURRENT_USER_FAILED,
-      );
-    }
+    return this.userModel.findOne({ where: { email } });
   }
 
   async findAndUpdateUserByResetToken(token: string, password: string) {
-    try {
-      const user = await this.userModel.findOne({
-        where: {
-          resetPasswordToken: token,
-          resetPasswordTokenExpiration: {
-            [Op.gt]: new Date(), // Ensure the token has not expired
-          },
+    const user = await this.userModel.findOne({
+      where: {
+        resetPasswordToken: token,
+        resetPasswordTokenExpiration: {
+          [Op.gt]: new Date(), // Ensure the token has not expired
         },
-      });
+      },
+    });
 
-      if (!user) {
-        throw new NotFoundException(ERROR_CONSTANT.GENERAL.TOKEN);
-      }
-
-      await user.update({
-        resetPasswordToken: null,
-        resetPasswordTokenExpiration: null,
-        password: password,
-      });
-
-      return user;
-    } catch (error) {
-      console.error('Error while updating user data:', error);
-      throw new InternalServerErrorException(
-        ERROR_CONSTANT.USER.UPDATE_USER_PROFILE_FAILED,
-      );
+    if (!user) {
+      throw new NotFoundException(ERROR_CONSTANT.GENERAL.TOKEN);
     }
+
+    await user.update({
+      resetPasswordToken: null,
+      resetPasswordTokenExpiration: null,
+      password: password,
+    });
+
+    return user;
   }
 
   async updateUserRefreshToken(email: string, token: string) {
-    try {
-      const user = await this.findUserByEmail(email);
+    const user = await this.findUserByEmail(email);
 
-      await user.update({ refreshToken: token });
-
-      return user;
-    } catch (error) {
-      console.error('Error while updating user data:', error);
-      throw new InternalServerErrorException(
-        ERROR_CONSTANT.USER.UPDATE_USER_PROFILE_FAILED,
-      );
+    if (!user) {
+      throw new NotFoundException(ERROR_CONSTANT.AUTH.USER_DOES_NOT_EXIST);
     }
+
+    await user.update({ refreshToken: token });
+
+    return user;
   }
 
   async deleteUser(email: string) {
-    try {
-      const user = await this.findUserByEmail(email);
+    const user = await this.findUserByEmail(email);
 
-      await user.destroy();
-    } catch (error) {
-      console.error('Error while deleting user data:', error);
-      throw new InternalServerErrorException(
-        ERROR_CONSTANT.USER.DELETE_USER_FAILED,
-      );
+    if (!user) {
+      throw new NotFoundException(ERROR_CONSTANT.AUTH.USER_DOES_NOT_EXIST);
     }
+
+    await user.destroy();
   }
 }

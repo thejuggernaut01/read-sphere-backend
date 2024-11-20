@@ -22,20 +22,17 @@ export class OtpService {
       const code = BaseHelper.generateOTP();
       const expiresAt = new Date(Date.now() + 15 * 60 * 1000);
 
-      const userOtp = this.otpModel.build({
+      await this.otpModel.create({
         userId,
         code,
         expiresAt,
         isInvalid: false,
       });
-
-      await userOtp.save();
-
-      return userOtp.code;
+      return code;
     } catch (otpError) {
-      console.error('Error while creating OTP', otpError);
+      console.error('Error while generating OTP', otpError);
       throw new InternalServerErrorException(
-        ERROR_CONSTANT.GENERAL.SERVER_ERROR,
+        ERROR_CONSTANT.OTP.GENERATION_FAILED,
       );
     }
   }
@@ -50,7 +47,7 @@ export class OtpService {
           userId,
           code,
           expiresAt: {
-            [Op.gt]: new Date(), // Ensure OTP has not expired
+            [Op.gt]: new Date(),
           },
           isInvalid: false,
         },

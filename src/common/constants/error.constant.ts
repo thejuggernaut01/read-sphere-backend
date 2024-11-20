@@ -13,12 +13,14 @@ export const ERROR_CONSTANT = {
     ACCOUNT_LOCKED: 'Account is locked, please contact support',
     UNAUTHORIZED: 'Unauthorized access, please log in',
     USER_EXISTS: 'User already exists.',
+    USER_DOES_NOT_EXIST: 'User does not exist.',
     EXPIRED_SESSION: 'Session expired. Please log in again.',
   },
   OTP: {
     INVALID: 'Invalid OTP, please try again',
     EXPIRED: 'OTP has expired, please request a new one',
     VERIFICATION_FAILED: 'Failed to verify OTP, please try again',
+    GENERATION_FAILED: 'Failed to generate OTP, please try again',
   },
   USER: {
     GET_CURRENT_USER_FAILED: 'Failed to retrieve user data',

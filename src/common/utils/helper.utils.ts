@@ -1,5 +1,5 @@
-import bycrpt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
+import * as bycrpt from 'bcryptjs';
+import * as jwt from 'jsonwebtoken';
 import { ENVIRONMENT } from '../config/environment';
 import { randomBytes } from 'crypto';
 import { BadRequestException } from '@nestjs/common';

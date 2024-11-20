@@ -26,9 +26,18 @@ export class AuthController {
     await this.authService.signup(body);
   }
 
+  @ResponseMessage(RESPONSE_CONSTANT.AUTH.EMAIL_VERIFICATION_SUCCESS)
+  @Post('/verify-email')
+  async verifyEmail(@Body() body: VerifyEmailDto) {
+    await this.authService.verifyEmail(body);
+  }
+
   @ResponseMessage(RESPONSE_CONSTANT.AUTH.LOGIN_SUCCESS)
   @Post('/login')
-  async login(@Body() body: LoginDto, @Res() res: Response) {
+  async login(
+    @Body() body: LoginDto,
+    @Res({ passthrough: true }) res: Response,
+  ) {
     const user = await this.authService.login(body);
 
     // Set the refresh and access token cookie
@@ -41,12 +50,6 @@ export class AuthController {
     });
 
     return user;
-  }
-
-  @ResponseMessage(RESPONSE_CONSTANT.AUTH.EMAIL_VERIFICATION_SUCCESS)
-  @Post('/verify-email')
-  async verifyEmail(@Body() body: VerifyEmailDto) {
-    await this.authService.verifyEmail(body);
   }
 
   @ResponseMessage(RESPONSE_CONSTANT.AUTH.SEND_VERIFICATION_EMAIL_SUCCESS)
