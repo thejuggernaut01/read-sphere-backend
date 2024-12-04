@@ -19,6 +19,14 @@ describe('UserService', () => {
     rollback: jest.fn(),
   };
 
+  const userData = {
+    firstName: faker.person.firstName(),
+    lastName: faker.person.lastName(),
+    email: faker.internet.email(),
+    password: faker.internet.password({ length: 7 }),
+    termsAcceptedAt: faker.date.future(),
+  };
+
   beforeEach(async () => {
     mockUserModel = {
       sequelize: {
@@ -52,20 +60,12 @@ describe('UserService', () => {
   });
 
   it('should create a user successfully', async () => {
-    const createUserDto = {
-      firstName: faker.person.firstName(),
-      lastName: faker.person.lastName(),
-      email: faker.internet.email(),
-      password: faker.internet.password({ length: 7 }),
-      termsAcceptedAt: faker.date.future(),
-    };
-
-    const user = await service.createUser(createUserDto);
+    const user = await service.createUser(userData);
 
     expect(user).toBeDefined();
-    expect(mockUserModel.build).toHaveBeenCalledWith(createUserDto);
+    expect(mockUserModel.build).toHaveBeenCalledWith(userData);
     expect(mockTransaction.commit).toHaveBeenCalled();
-    expect(user).toEqual(expect.objectContaining(createUserDto));
+    expect(user).toEqual(expect.objectContaining(userData));
   });
 
   it('should not create user and rollback the transaction on error', async () => {
@@ -73,15 +73,7 @@ describe('UserService', () => {
       throw new Error('Database error');
     });
 
-    const createUserDto = {
-      firstName: faker.person.firstName(),
-      lastName: faker.person.lastName(),
-      email: faker.internet.email(),
-      password: faker.internet.password({ length: 7 }),
-      termsAcceptedAt: faker.date.future(),
-    };
-
-    await expect(service.createUser(createUserDto)).rejects.toThrow(
+    await expect(service.createUser(userData)).rejects.toThrow(
       new InternalServerErrorException(ERROR_CONSTANT.AUTH.REGISTER_FAILED),
     );
 
@@ -119,11 +111,7 @@ describe('UserService', () => {
     const email = faker.internet.email();
     const mockUser = {
       id: faker.database.mongodbObjectId(),
-      firstName: faker.person.firstName(),
-      lastName: faker.person.lastName(),
-      email,
-      password: faker.internet.password({ length: 7 }),
-      termsAcceptedAt: faker.date.future(),
+      ...userData,
     };
     mockUserModel.findOne.mockResolvedValue(mockUser);
 
@@ -139,7 +127,7 @@ describe('UserService', () => {
 
   it('should return null if no user is found by email', async () => {
     mockUserModel.findOne.mockResolvedValue(null);
-    const email = faker.internet.email();
+    const email = userData.email;
     const foundUser = await service.findUserByEmail(email);
     expect(foundUser).toBeNull();
     expect(mockUserModel.findOne).toHaveBeenCalledWith({ where: { email } });
@@ -147,7 +135,7 @@ describe('UserService', () => {
 
   it('should throw an error if findOne fails', async () => {
     mockUserModel.findOne.mockRejectedValue(new Error('Database error'));
-    const email = faker.internet.email();
+    const email = userData.email;
     await expect(service.findUserByEmail(email)).rejects.toThrow(
       'Database error',
     );
@@ -156,7 +144,7 @@ describe('UserService', () => {
 
   it('should update user reset token and expiration', async () => {
     const token = faker.string.alphanumeric(20);
-    const password = faker.internet.password({ length: 7 });
+    const password = userData.password;
     const mockUser = {
       resetPasswordToken: token,
       resetPasswordTokenExpiration: new Date(Date.now() + 3600000),
@@ -188,7 +176,7 @@ describe('UserService', () => {
 
   it('should throw NotFoundException if user is not found', async () => {
     const token = faker.string.alphanumeric(20);
-    const password = faker.internet.password({ length: 7 });
+    const password = userData.password;
     mockUserModel.findOne.mockResolvedValue(null);
 
     await expect(
@@ -206,15 +194,12 @@ describe('UserService', () => {
   });
 
   it('should update user refresh token', async () => {
-    const email = faker.internet.email();
+    const email = userData.email;
     const token = faker.string.alphanumeric(20);
 
     const mockUser = {
-      firstName: faker.person.firstName(),
-      lastName: faker.person.lastName(),
+      ...userData,
       email,
-      password: faker.internet.password({ length: 7 }),
-      termsAcceptedAt: faker.date.future(),
       update: jest.fn(),
     };
     mockUserModel.findOne.mockResolvedValue(mockUser);
@@ -232,7 +217,7 @@ describe('UserService', () => {
   });
 
   it('should throw NotFoundException if user is not found', async () => {
-    const email = faker.internet.email();
+    const email = userData.email;
     const token = faker.string.alphanumeric(20);
     mockUserModel.findOne.mockResolvedValue(null);
 
@@ -246,14 +231,11 @@ describe('UserService', () => {
   });
 
   it('should delete user', async () => {
-    const email = faker.internet.email();
+    const email = userData.email;
 
     const mockUser = {
-      firstName: faker.person.firstName(),
-      lastName: faker.person.lastName(),
+      ...userData,
       email,
-      password: faker.internet.password({ length: 7 }),
-      termsAcceptedAt: faker.date.future(),
       destroy: jest.fn(),
     };
     mockUserModel.findOne.mockResolvedValue(mockUser);
