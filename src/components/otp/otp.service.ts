@@ -38,33 +38,26 @@ export class OtpService {
   }
 
   async verifyOTP(payload: ValidateOtpDto) {
-    try {
-      const { userId, code } = payload;
+    const { userId, code } = payload;
 
-      // Check if OTP exists and is valid
-      const otpRecord = await this.otpModel.findOne({
-        where: {
-          userId,
-          code,
-          expiresAt: {
-            [Op.gt]: new Date(),
-          },
-          isInvalid: false,
+    // Check if OTP exists and is valid
+    const otpRecord = await this.otpModel.findOne({
+      where: {
+        userId,
+        code,
+        expiresAt: {
+          [Op.gt]: new Date(),
         },
-      });
+        isInvalid: false,
+      },
+    });
 
-      if (!otpRecord) {
-        throw new NotFoundException(ERROR_CONSTANT.OTP.INVALID);
-      }
-
-      // Mark OTP as verified
-      otpRecord.isInvalid = true;
-      await otpRecord.save();
-    } catch (otpError) {
-      console.error('Error while verifying OTP', otpError);
-      throw new InternalServerErrorException(
-        ERROR_CONSTANT.OTP.VERIFICATION_FAILED,
-      );
+    if (!otpRecord) {
+      throw new NotFoundException(ERROR_CONSTANT.OTP.INVALID);
     }
+
+    // Mark OTP as verified
+    otpRecord.isInvalid = true;
+    await otpRecord.save();
   }
 }
