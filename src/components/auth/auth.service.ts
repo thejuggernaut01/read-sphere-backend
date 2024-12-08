@@ -69,7 +69,7 @@ export class AuthService {
 
     await this.usersService.updateUserRefreshToken(user.email, refreshToken);
 
-    return { ...user.dataValues, accessToken };
+    return { ...user.dataValues, accessToken, refreshToken };
   }
 
   async verifyEmail(payload: IVerifyEmail) {

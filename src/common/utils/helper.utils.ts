@@ -4,6 +4,7 @@ import { ENVIRONMENT } from '../config/environment';
 import { randomBytes } from 'crypto';
 import { BadRequestException } from '@nestjs/common';
 import { CookieOptions, Response } from 'express';
+import { IDecodedToken } from '../types';
 
 export class BaseHelper {
   static hashData(data: string): Promise<string> {
@@ -55,11 +56,11 @@ export class BaseHelper {
   }
 
   static verifyJwtAccessToken(token: string) {
-    return jwt.verify(token, ENVIRONMENT.JWT.ACCESS_TOKEN);
+    return jwt.verify(token, ENVIRONMENT.JWT.ACCESS_TOKEN) as IDecodedToken;
   }
 
   static verifyJwtRefreshToken(token: string) {
-    return jwt.verify(token, ENVIRONMENT.JWT.REFRESH_TOKEN);
+    return jwt.verify(token, ENVIRONMENT.JWT.REFRESH_TOKEN) as IDecodedToken;
   }
 
   static setCookie(

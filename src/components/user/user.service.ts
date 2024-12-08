@@ -34,10 +34,6 @@ export class UserService {
     }
   }
 
-  async findUserById(userId: number) {
-    return this.userModel.findByPk(userId);
-  }
-
   async findUserByEmail(email: string) {
     return this.userModel.findOne({ where: { email } });
   }
@@ -86,4 +82,18 @@ export class UserService {
 
     await user.destroy();
   }
+
+  async findUserById(userId: number) {
+    return this.userModel.findByPk(userId);
+  }
+
+  // async updateUserData(userId: number, data: Partial<UserModel>) {
+  //   const user = await this.findUserById(userId);
+
+  //   if (!user) {
+  //     throw new NotFoundException(ERROR_CONSTANT.AUTH.USER_DOES_NOT_EXIST);
+  //   }
+
+  //   user.update(data);
+  // }
 }
