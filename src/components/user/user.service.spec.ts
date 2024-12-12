@@ -22,6 +22,7 @@ describe('UserService', () => {
   const userData = {
     firstName: faker.person.firstName(),
     lastName: faker.person.lastName(),
+    userName: faker.internet.username(),
     email: faker.internet.email(),
     password: faker.internet.password({ length: 7 }),
     termsAcceptedAt: faker.date.future(),
@@ -81,19 +82,11 @@ describe('UserService', () => {
   });
 
   it('should find a user by ID', async () => {
-    const createUserDto = {
-      firstName: faker.person.firstName(),
-      lastName: faker.person.lastName(),
-      email: faker.internet.email(),
-      password: faker.internet.password({ length: 7 }),
-      termsAcceptedAt: faker.date.future(),
-    };
-
-    const user = await service.createUser(createUserDto);
+    const user = await service.createUser(userData);
 
     mockUserModel.findByPk.mockResolvedValue({
       id: user.id,
-      ...createUserDto,
+      ...userData,
     });
 
     const foundUser = await service.findUserById(user.id);
@@ -101,7 +94,7 @@ describe('UserService', () => {
     expect(foundUser).toBeDefined();
     expect(foundUser).toEqual({
       id: user.id,
-      ...createUserDto,
+      ...userData,
     });
 
     expect(mockUserModel.findByPk).toHaveBeenCalledWith(user.id);

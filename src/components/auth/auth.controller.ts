@@ -1,5 +1,11 @@
 import { AuthService } from './auth.service';
 import { Body, Controller, Post, Patch, Param, Res } from '@nestjs/common';
+import { SerializeResponse } from '../../common/interceptors/response-serializer.interceptor';
+import { ResponseMessage } from '../../common/decorator/response.decorator';
+import { RESPONSE_CONSTANT } from '../../common/constants/response.constant';
+import { Response } from 'express';
+import { BaseHelper } from 'src/common/utils/helper.utils';
+import { UserResponse } from '../user/transformers/user-response.transformer';
 import {
   CreateUserDto,
   ForgotPasswordDto,
@@ -7,16 +13,10 @@ import {
   ResendVerifyEmailDto,
   VerifyEmailDto,
   ResetPasswordDto,
-} from './dto/auth.dto';
-import { SerializeResponse } from '../../common/interceptors/response-serializer.interceptor';
-import { UserDto } from '../user/dto/user.dto';
-import { ResponseMessage } from '../../common/decorator/response.decorator';
-import { RESPONSE_CONSTANT } from '../../common/constants/response.constant';
-import { Response } from 'express';
-import { BaseHelper } from 'src/common/utils/helper.utils';
+} from '../user/dto/user.dto';
 
 @Controller('auth')
-@SerializeResponse(UserDto)
+@SerializeResponse(UserResponse)
 export class AuthController {
   constructor(private authService: AuthService) {}
 

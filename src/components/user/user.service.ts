@@ -6,9 +6,10 @@ import {
 import { InjectModel } from '@nestjs/sequelize';
 import { UserModel } from './model/user.model';
 import { Transaction } from 'sequelize';
-import { CreateUserDto } from '../auth/dto/auth.dto';
 import { ERROR_CONSTANT } from '../../common/constants/error.constant';
 import { Op } from 'sequelize';
+
+import { ICreateUser } from './interface';
 
 @Injectable()
 export class UserService {
@@ -16,12 +17,12 @@ export class UserService {
     @InjectModel(UserModel) private readonly userModel: typeof UserModel,
   ) {}
 
-  async createUser(createUserDto: CreateUserDto) {
+  async createUser(payload: ICreateUser) {
     const transaction: Transaction =
       await this.userModel.sequelize.transaction();
 
     try {
-      const user = this.userModel.build(createUserDto);
+      const user = this.userModel.build(payload);
       await user.save({ transaction });
       await transaction.commit();
       return user;
@@ -84,7 +85,13 @@ export class UserService {
   }
 
   async findUserById(userId: number) {
-    return this.userModel.findByPk(userId);
+    const user = await this.userModel.findByPk(userId);
+
+    if (!user) {
+      throw new NotFoundException(ERROR_CONSTANT.AUTH.USER_DOES_NOT_EXIST);
+    }
+
+    return user;
   }
 
   // async updateUserData(userId: number, data: Partial<UserModel>) {

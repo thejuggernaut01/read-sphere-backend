@@ -11,6 +11,7 @@ import { BookModule } from './components/book/book.module';
 import { DatabaseModule } from './components/database/database.module';
 import { OtpModule } from './components/otp/otp.module';
 import { MailModule } from './components/mail/mail.module';
+import { CollectionModule } from './components/collection/collection.module';
 
 @Module({
   imports: [
@@ -40,6 +41,7 @@ import { MailModule } from './components/mail/mail.module';
     BookModule,
     OtpModule,
     MailModule,
+    CollectionModule,
   ],
   controllers: [AppController],
   providers: [

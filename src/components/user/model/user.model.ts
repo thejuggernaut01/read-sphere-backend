@@ -12,7 +12,9 @@ import {
   DeletedAt,
   Default,
   Index,
+  HasMany,
 } from 'sequelize-typescript';
+import { BookModel } from '../../book/model/book.model';
 
 @Table({
   tableName: 'Users',
@@ -36,14 +38,38 @@ export class UserModel extends Model<UserModel> {
 
   @AllowNull(false)
   @Index({ unique: true })
-  @Length({ max: 100 })
+  @Length({ min: 2, max: 50 })
   @Column(DataType.STRING)
+  userName: string;
+
+  @AllowNull(false)
+  @Index({ unique: true })
+  @Length({ max: 100 })
+  @Column({
+    type: DataType.STRING,
+    validate: {
+      isEmail: true,
+    },
+  })
   email: string;
 
   @AllowNull(false)
   @Length({ min: 6, max: 100 })
   @Column(DataType.STRING)
   password: string;
+
+  @AllowNull(false)
+  @Column({
+    type: DataType.STRING,
+    validate: {
+      isUrl: true,
+    },
+  })
+  profilePictureUrl: string;
+
+  @AllowNull(false)
+  @Column(DataType.STRING)
+  coverImageUrl: string;
 
   @AllowNull(false)
   @Column(DataType.DATE)
@@ -80,4 +106,7 @@ export class UserModel extends Model<UserModel> {
   @DeletedAt
   @Column(DataType.DATE)
   deletedAt: Date;
+
+  @HasMany(() => BookModel)
+  books: BookModel[];
 }

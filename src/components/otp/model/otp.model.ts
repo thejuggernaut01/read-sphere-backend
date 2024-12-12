@@ -6,7 +6,6 @@ import {
   ForeignKey,
   BelongsTo,
   CreatedAt,
-  Index,
 } from 'sequelize-typescript';
 import { UserModel } from '../../../components/user/model/user.model';
 
@@ -18,7 +17,6 @@ export class OTPModel extends Model<OTPModel> {
   @Column(DataType.INTEGER)
   userId: number;
 
-  @Index
   @Column(DataType.INTEGER)
   code: number;
 

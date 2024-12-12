@@ -11,7 +11,7 @@ import {
   IResendVerifyEmail,
   IForgotPassword,
   IResetPassword,
-} from './types/auth.types';
+} from '../user/interface';
 import { BaseHelper } from '../../common/utils/helper.utils';
 import { ERROR_CONSTANT } from '../../common/constants/error.constant';
 import { MailService } from '../mail/mail.service';
