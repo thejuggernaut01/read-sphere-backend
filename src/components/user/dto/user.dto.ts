@@ -5,6 +5,7 @@ import {
   IsInt,
   IsNotEmpty,
   IsString,
+  IsStrongPassword,
   Length,
   MaxLength,
   MinLength,
@@ -50,6 +51,15 @@ class CreateUserDto {
   @IsNotEmpty({ message: PASSWORD.IS_NOT_EMPTY })
   @MinLength(6, { message: PASSWORD.MIN_LENGTH })
   @MaxLength(20, { message: PASSWORD.MAX_LENGTH })
+  @IsStrongPassword(
+    {
+      minUppercase: 1,
+      minLowercase: 1,
+      minNumbers: 1,
+      minSymbols: 1,
+    },
+    { message: PASSWORD.IS_STRONG_PASSWORD },
+  )
   password: string;
 
   @IsDate({ message: TERMS_ACCEPTED_AT.IS_DATE })
@@ -106,6 +116,15 @@ class ResetPasswordDto {
   @IsNotEmpty({ message: PASSWORD.IS_NOT_EMPTY })
   @MinLength(6, { message: PASSWORD.MIN_LENGTH })
   @MaxLength(20, { message: PASSWORD.MAX_LENGTH })
+  @IsStrongPassword(
+    {
+      minUppercase: 1,
+      minLowercase: 1,
+      minNumbers: 1,
+      minSymbols: 1,
+    },
+    { message: PASSWORD.IS_STRONG_PASSWORD },
+  )
   password: string;
 }
 

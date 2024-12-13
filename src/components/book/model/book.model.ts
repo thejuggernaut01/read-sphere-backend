@@ -55,14 +55,25 @@ export class BookModel extends Model<BookModel> {
   author: string;
 
   @AllowNull(false)
-  @Column(DataType.STRING)
+  @Column({
+    type: DataType.STRING,
+    validate: {
+      isUrl: true,
+    },
+  })
   fileUrl: string;
 
   @AllowNull(false)
-  @Column(DataType.STRING)
+  @Column({
+    type: DataType.STRING,
+    validate: {
+      isUrl: true,
+    },
+  })
   imageUrl: string;
 
   @AllowNull(false)
+  @Min(1)
   @Column(DataType.INTEGER)
   pages: number;
 
@@ -71,6 +82,7 @@ export class BookModel extends Model<BookModel> {
   language: string;
 
   @AllowNull(false)
+  @Min(1)
   @Column(DataType.INTEGER)
   pg: number;
 

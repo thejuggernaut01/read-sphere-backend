@@ -29,13 +29,13 @@ export const ERROR_CONSTANT = {
     NOT_FOUND: 'User not found',
   },
   BOOK: {
-    ADD_BOOK_FAILED: 'Failed to add book to your collection, please try again',
-    DELETE_BOOK_FAILED: 'Failed to remove book from your collection',
-    UPDATE_BOOK_DETAILS_FAILED:
-      'Failed to update book details, please try again',
-    BOOK_UPLOAD_FAILED: 'Failed to upload book, please try again',
-    BOOK_SHARE_FAILED: 'Failed to share book, please try again',
-    BOOK_NOT_FOUND: 'Book not found',
+    ADD_FAILED: 'Failed to add book to your collection, please try again',
+    DELETE_FAILED: 'Failed to remove book from your collection',
+    UPDATE_DETAILS_FAILED: 'Failed to update book details, please try again',
+    UPLOAD_FAILED: 'Failed to upload book, please try again',
+    SHARE_FAILED: 'Failed to share book, please try again',
+    NOT_FOUND: 'Book not found',
+    RETRIEVE_FALIED: 'Failed to retrieve books. Please try again later.',
   },
   COLLECTION: {
     CREATE_COLLECTION_FAILED: 'Failed to create book collection',

@@ -52,6 +52,7 @@ import { CollectionModule } from './components/collection/collection.module';
         whitelist: true,
         forbidNonWhitelisted: true,
         transform: true,
+        forbidUnknownValues: true,
       }),
     },
   ],

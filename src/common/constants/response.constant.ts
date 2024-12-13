@@ -22,19 +22,22 @@ export const RESPONSE_CONSTANT = {
     DELETE_USER_SUCCESS: 'User deleted successfully',
   },
   BOOK: {
-    ADD_BOOK_SUCCESS: 'Book added to your collection successfully',
-    DELETE_BOOK_SUCCESS: 'Book removed from your collection',
-    UPDATE_BOOK_DETAILS_SUCCESS: 'Book details updated successfully',
-    BOOK_NOT_FOUND: 'Book not found',
-    BOOK_UPLOAD_SUCCESS: 'Book uploaded successfully',
-    BOOK_SHARE_SUCCESS: 'Book shared successfully',
+    ADD_SUCCESS: 'Book added successfully',
+    DELETE_SUCCESS: 'Book deleted successfully',
+    UPDATE_SUCCESS: 'Book details updated successfully',
+    RETRIEVE_SUCCESS: 'Books retrieved successfully',
+    SHARE_SUCCESS: 'Book shared successfully',
+    DETAILS_SUCCESS: 'Book details retrieved successfully',
+    RETRIEVE_USER_SUCCESS: 'Your books retrieved successfully',
   },
   COLLECTION: {
     CREATE_COLLECTION_SUCCESS: 'Book collection created successfully',
     DELETE_COLLECTION_SUCCESS: 'Book collection deleted successfully',
     UPDATE_COLLECTION_SUCCESS: 'Book collection updated successfully',
-    ADD_BOOK_TO_COLLECTION_SUCCESS: 'Book added to your collection',
-    REMOVE_BOOK_FROM_COLLECTION_SUCCESS: 'Book removed from the collection',
+    ADD_BOOK_TO_COLLECTION_SUCCESS:
+      'Book added to your collection successfully',
+    REMOVE_BOOK_FROM_COLLECTION_SUCCESS:
+      'Book removed from the collection successfully',
     COLLECTION_NOT_FOUND: 'Book collection not found',
   },
   READING_LIST: {

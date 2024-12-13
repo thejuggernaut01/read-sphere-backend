@@ -23,13 +23,13 @@ export class AuthController {
   @ResponseMessage(RESPONSE_CONSTANT.AUTH.REGISTER_SUCCESS)
   @Post('/signup')
   async signup(@Body() body: CreateUserDto) {
-    await this.authService.signup(body);
+    return await this.authService.signup(body);
   }
 
   @ResponseMessage(RESPONSE_CONSTANT.AUTH.EMAIL_VERIFICATION_SUCCESS)
   @Post('/verify-email')
   async verifyEmail(@Body() body: VerifyEmailDto) {
-    await this.authService.verifyEmail(body);
+    return await this.authService.verifyEmail(body);
   }
 
   @ResponseMessage(RESPONSE_CONSTANT.AUTH.LOGIN_SUCCESS)
@@ -55,13 +55,13 @@ export class AuthController {
   @ResponseMessage(RESPONSE_CONSTANT.AUTH.SEND_VERIFICATION_EMAIL_SUCCESS)
   @Post('/resend-verify-email')
   async resendVerifyEmail(@Body() body: ResendVerifyEmailDto) {
-    await this.authService.resendVerifyEmail(body);
+    return await this.authService.resendVerifyEmail(body);
   }
 
   @ResponseMessage(RESPONSE_CONSTANT.AUTH.PASSWORD_RESET_EMAIL_SUCCESS)
   @Post('/forgot-password')
   async forgotPassword(@Body() body: ForgotPasswordDto) {
-    await this.authService.forgotPassword(body);
+    return await this.authService.forgotPassword(body);
   }
 
   @ResponseMessage(RESPONSE_CONSTANT.AUTH.PASSWORD_RESET_SUCCESS)
@@ -70,6 +70,9 @@ export class AuthController {
     @Param('token') token: string,
     @Body() body: ResetPasswordDto,
   ) {
-    await this.authService.resetPassword({ token, password: body.password });
+    return await this.authService.resetPassword({
+      token,
+      password: body.password,
+    });
   }
 }

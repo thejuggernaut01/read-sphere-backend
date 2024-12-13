@@ -19,9 +19,13 @@ import { Dialect } from 'sequelize';
           autoLoadModels: true,
           synchronize: !isProduction,
           logging: false,
-          ssl: !isProduction, // Set to true only in production
+          ssl: !isProduction,
           dialectOptions: {
             ssl: !isProduction ? false : { rejectUnauthorized: true },
+          },
+          sync: {
+            alter: !isProduction,
+            force: false,
           },
         };
       },

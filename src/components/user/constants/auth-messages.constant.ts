@@ -28,6 +28,7 @@ const AUTH_VALIDATION_MSG = {
     IS_NOT_EMPTY: 'Password is required',
     MIN_LENGTH: 'Password must be at least 6 characters long',
     MAX_LENGTH: 'Password must be at most 20 characters long',
+    IS_STRONG_PASSWORD: 'Password is not strong enough',
   },
   TERMS_ACCEPTED_AT: {
     IS_DATE: 'termsAcceptedAt must be a valid date or date string',
