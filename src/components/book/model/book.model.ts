@@ -45,9 +45,9 @@ export class BookModel extends Model<BookModel> {
   description: string;
 
   @AllowNull(false)
-  @Column(DataType.DECIMAL({ precision: 1, scale: 1 }))
   @Min(1.0)
   @Max(5.0)
+  @Column(DataType.DECIMAL({ precision: 1, scale: 1 }))
   rating: number;
 
   @AllowNull(false)
