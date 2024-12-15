@@ -24,8 +24,8 @@ import { Dialect } from 'sequelize';
             ssl: !isProduction ? false : { rejectUnauthorized: true },
           },
           sync: {
-            alter: !isProduction,
-            force: false,
+            // alter: !isProduction,
+            force: !isProduction,
           },
         };
       },

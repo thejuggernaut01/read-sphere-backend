@@ -16,6 +16,10 @@ import { BaseHelper } from '../../common/utils/helper.utils';
 import { ERROR_CONSTANT } from '../../common/constants/error.constant';
 import { MailService } from '../mail/mail.service';
 import { OtpService } from '../otp/otp.service';
+import { InjectQueue } from '@nestjs/bullmq';
+import { QUEUE_NAME } from 'src/common/constants/queue.constant';
+import { Queue } from 'bullmq';
+import { AUTH_JOB_NAMES } from './enum';
 
 @Injectable()
 export class AuthService {
@@ -23,6 +27,7 @@ export class AuthService {
     private usersService: UserService,
     private mailService: MailService,
     private otpService: OtpService,
+    @InjectQueue(QUEUE_NAME.AUTH) private readonly authEmailQueue: Queue,
   ) {}
 
   async signup(payload: ICreateUser) {
@@ -41,10 +46,14 @@ export class AuthService {
 
     const code = await this.otpService.createOtp(user.id);
 
-    await this.mailService.sendVerificationEmail('Verify your email', code, {
-      email: user.email,
-      firstName: user.firstName,
-      lastName: user.lastName,
+    await this.authEmailQueue.add(AUTH_JOB_NAMES.SEND_VERIFICATION_EMAIL, {
+      subject: 'Verify your email',
+      code,
+      user: {
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+      },
     });
   }
 
@@ -88,10 +97,13 @@ export class AuthService {
     user.emailVerified = true;
     await user.save();
 
-    await this.mailService.sendWelcomeEmail('Welcome to Read Sphere', {
-      email: user.email,
-      firstName: user.firstName,
-      lastName: user.lastName,
+    await this.authEmailQueue.add(AUTH_JOB_NAMES.SEND_WELCOME_EMAIL, {
+      subject: 'Verify your email',
+      user: {
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+      },
     });
   }
 
@@ -104,10 +116,14 @@ export class AuthService {
 
     const code = await this.otpService.createOtp(user.id);
 
-    await this.mailService.sendVerificationEmail('Verify your email', code, {
-      email: user.email,
-      firstName: user.firstName,
-      lastName: user.lastName,
+    await this.authEmailQueue.add(AUTH_JOB_NAMES.SEND_VERIFICATION_EMAIL, {
+      subject: 'Verify your email',
+      code,
+      user: {
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+      },
     });
   }
 
@@ -120,15 +136,15 @@ export class AuthService {
 
     const code = await this.otpService.createOtp(user.id);
 
-    await this.mailService.sendForgotPasswordEmail(
-      'Reset your Read Sphere account password',
+    await this.authEmailQueue.add(AUTH_JOB_NAMES.SEND_FORGOT_PASSWORD_EMAIL, {
+      subject: 'Reset your Read Sphere account password',
       code,
-      {
+      user: {
         email: user.email,
         firstName: user.firstName,
         lastName: user.lastName,
       },
-    );
+    });
   }
 
   async resetPassword(payload: IResetPassword) {
