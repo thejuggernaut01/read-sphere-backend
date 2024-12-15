@@ -25,7 +25,7 @@ import { Dialect } from 'sequelize';
           },
           sync: {
             // alter: !isProduction,
-            force: !isProduction,
+            // force: !isProduction,
           },
         };
       },

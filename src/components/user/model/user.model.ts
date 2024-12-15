@@ -58,7 +58,7 @@ export class UserModel extends Model<UserModel> {
   @Column(DataType.STRING)
   password: string;
 
-  @AllowNull(false)
+  @AllowNull(true)
   @Column({
     type: DataType.STRING,
     validate: {
@@ -67,7 +67,7 @@ export class UserModel extends Model<UserModel> {
   })
   profilePictureUrl: string;
 
-  @AllowNull(false)
+  @AllowNull(true)
   @Column(DataType.STRING)
   coverImageUrl: string;
 

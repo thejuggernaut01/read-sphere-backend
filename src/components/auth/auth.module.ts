@@ -7,6 +7,8 @@ import { OtpModule } from '../otp/otp.module';
 import { BullModule } from '@nestjs/bullmq';
 import { QUEUE_NAME } from '../../common/constants/queue.constant';
 import { AuthMailConsumer } from './auth-mail.consumer';
+import { BullBoardModule } from '@bull-board/nestjs';
+import { BullMQAdapter } from '@bull-board/api/bullMQAdapter';
 
 @Module({
   imports: [
@@ -29,6 +31,10 @@ import { AuthMailConsumer } from './auth-mail.consumer';
           age: 24 * 3600, // keep up to 24 hours
         },
       },
+    }),
+    BullBoardModule.forFeature({
+      name: QUEUE_NAME.AUTH,
+      adapter: BullMQAdapter,
     }),
   ],
   controllers: [AuthController],

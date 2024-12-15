@@ -98,7 +98,7 @@ export class AuthService {
     await user.save();
 
     await this.authEmailQueue.add(AUTH_JOB_NAMES.SEND_WELCOME_EMAIL, {
-      subject: 'Verify your email',
+      subject: 'Welcome to Read Sphere',
       user: {
         email: user.email,
         firstName: user.firstName,

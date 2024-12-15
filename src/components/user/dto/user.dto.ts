@@ -6,7 +6,7 @@ import {
   IsNotEmpty,
   IsString,
   IsStrongPassword,
-  Length,
+  // Length,
   MaxLength,
   MinLength,
 } from 'class-validator';
@@ -91,7 +91,7 @@ class VerifyEmailDto {
 
   @IsInt({ message: CODE.IS_INT })
   @IsNotEmpty({ message: CODE.IS_NOT_EMPTY })
-  @Length(6, 6, { message: CODE.LENGTH })
+  // @Length(6, 6, { message: CODE.LENGTH })
   code: number;
 }
 

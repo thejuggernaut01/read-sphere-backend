@@ -1,4 +1,5 @@
 import { NestFactory, Reflector } from '@nestjs/core';
+import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
 import { Logger, LoggerErrorInterceptor } from 'nestjs-pino';
 import * as express from 'express';
@@ -26,8 +27,16 @@ async function bootstrap() {
 
   app.use(cookieParser());
 
-  //  interceptors
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      transform: true,
+      forbidUnknownValues: true,
+    }),
+  );
 
+  //  interceptors
   app.useGlobalInterceptors(
     new ResponseTransformerInterceptor(app.get(Reflector)),
   );

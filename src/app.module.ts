@@ -1,9 +1,9 @@
-import { Module, ValidationPipe } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UserModule } from './components/user/user.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { APP_PIPE } from '@nestjs/core';
+
 import { LoggerModule } from 'nestjs-pino';
 import { AuthModule } from './components/auth/auth.module';
 import { ENVIRONMENT } from './common/config/environment';
@@ -13,6 +13,8 @@ import { OtpModule } from './components/otp/otp.module';
 import { MailModule } from './components/mail/mail.module';
 import { CollectionModule } from './components/collection/collection.module';
 import { BullModule } from '@nestjs/bullmq';
+import { BullBoardModule } from '@bull-board/nestjs';
+import { ExpressAdapter } from '@bull-board/express';
 
 @Module({
   imports: [
@@ -41,11 +43,16 @@ import { BullModule } from '@nestjs/bullmq';
         connection: {
           host: configService.get('REDIS_HOST'),
           port: configService.get('REDIS_PORT'),
+          password: configService.get('REDIS_PASSWORD'),
           maxRetriesPerRequest: null,
           enableOfflineQueue: false,
           offlineQueue: false,
         },
       }),
+    }),
+    BullBoardModule.forRoot({
+      adapter: ExpressAdapter,
+      route: '/bull-board/queues',
     }),
     DatabaseModule,
     UserModule,
@@ -56,17 +63,6 @@ import { BullModule } from '@nestjs/bullmq';
     CollectionModule,
   ],
   controllers: [AppController],
-  providers: [
-    AppService,
-    {
-      provide: APP_PIPE,
-      useValue: new ValidationPipe({
-        whitelist: true,
-        forbidNonWhitelisted: true,
-        transform: true,
-        forbidUnknownValues: true,
-      }),
-    },
-  ],
+  providers: [AppService],
 })
 export class AppModule {}
