@@ -18,29 +18,50 @@ export class AuthMailConsumer extends WorkerHost {
 
   @OnQueueEvent('added')
   onQueueAdded(job: Job) {
-    console.log(`Processing job with ID ${job.id}...`);
+    console.log(
+      `[QUEUE EVENT - ADDED] A new job has been added to the queue. Job ID: ${job.id}, Name: ${job.name}, Data: ${JSON.stringify(
+        job.data,
+      )}`,
+    );
   }
 
   @OnQueueEvent('failed')
   onQueueFailed(job: Job) {
     console.log(
-      `Job with ID ${job.id} failed with error ${job.failedReason}...`,
+      `[QUEUE EVENT - FAILED] Job processing failed. 
+    Job ID: ${job.id}, 
+    Name: ${job.name}, 
+    Attempts Made: ${job.attemptsMade}/${job.opts.attempts}, 
+    Reason: ${job.failedReason}`,
     );
   }
 
   @OnQueueEvent('waiting')
   onQueueWaiting(job: Job) {
-    console.log(`Job with ID ${job.id} is waiting...`);
+    console.log(
+      `[QUEUE EVENT - WAITING] Job is now waiting to be processed. 
+    Job ID: ${job.id}, Name: ${job.name}`,
+    );
   }
 
   @OnQueueEvent('completed')
   onQueueCompleted(job: Job) {
-    console.log(`Job with ID ${job.id} completed`, job.returnvalue);
+    console.log(
+      `[QUEUE EVENT - COMPLETED] Job successfully completed. 
+    Job ID: ${job.id}, 
+    Name: ${job.name}, 
+    Return Value: ${JSON.stringify(job.returnvalue)}`,
+    );
   }
 
   @OnWorkerEvent('error')
   onWorkerError(job: Job) {
-    console.error(`Error processing email job: ${job.failedReason}`);
+    console.error(
+      `[WORKER EVENT - ERROR] An error occurred during job processing. 
+    Job ID: ${job.id}, 
+    Name: ${job.name}, 
+    Error: ${job.failedReason || 'Unknown error'}`,
+    );
   }
 
   async process(job: Job<IEmailJobData, any, string>): Promise<any> {
