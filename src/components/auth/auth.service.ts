@@ -14,7 +14,6 @@ import {
 } from '../user/interface';
 import { BaseHelper } from '../../common/utils/helper.utils';
 import { ERROR_CONSTANT } from '../../common/constants/error.constant';
-import { MailService } from '../mail/mail.service';
 import { OtpService } from '../otp/otp.service';
 import { InjectQueue } from '@nestjs/bullmq';
 import { QUEUE_NAME } from 'src/common/constants/queue.constant';
@@ -25,7 +24,6 @@ import { AUTH_JOB_NAMES } from './enum';
 export class AuthService {
   constructor(
     private usersService: UserService,
-    private mailService: MailService,
     private otpService: OtpService,
     @InjectQueue(QUEUE_NAME.AUTH) private readonly authEmailQueue: Queue,
   ) {}

@@ -2,6 +2,7 @@ import {
   AllowNull,
   AutoIncrement,
   BelongsTo,
+  BelongsToMany,
   Column,
   CreatedAt,
   DataType,
@@ -17,6 +18,8 @@ import {
   UpdatedAt,
 } from 'sequelize-typescript';
 import { UserModel } from '../../user/model/user.model';
+import { CollectionBooksModel } from '../../collection/model/collection-books.model';
+import { CollectionModel } from '../../collection/model/collection.model';
 
 @Table({
   tableName: 'Books',
@@ -111,4 +114,7 @@ export class BookModel extends Model<BookModel> {
 
   @BelongsTo(() => UserModel, 'userId')
   user: UserModel;
+
+  @BelongsToMany(() => CollectionModel, () => CollectionBooksModel)
+  collections: CollectionModel[];
 }

@@ -15,6 +15,7 @@ import {
   HasMany,
 } from 'sequelize-typescript';
 import { BookModel } from '../../book/model/book.model';
+import { CollectionModel } from '../../collection/model/collection.model';
 
 @Table({
   tableName: 'Users',
@@ -109,4 +110,7 @@ export class UserModel extends Model<UserModel> {
 
   @HasMany(() => BookModel)
   books: BookModel[];
+
+  @HasMany(() => CollectionModel)
+  collections: CollectionModel[];
 }
