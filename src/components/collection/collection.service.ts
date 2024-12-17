@@ -1,26 +1,106 @@
-import { Injectable } from '@nestjs/common';
-import { CreateCollectionDto } from './dto/create-collection.dto';
-import { UpdateCollectionDto } from './dto/update-collection.dto';
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
+import { InjectModel } from '@nestjs/sequelize';
+import { CollectionModel } from './model/collection.model';
+import { BookModel } from '../book/model/book.model';
+import { ERROR_CONSTANT } from 'src/common/constants/error.constant';
 
 @Injectable()
 export class CollectionService {
-  create(createCollectionDto: CreateCollectionDto) {
-    return 'This action adds a new collection';
+  constructor(
+    @InjectModel(CollectionModel)
+    private readonly collectionModel: typeof CollectionModel,
+
+    @InjectModel(BookModel) private readonly bookModel: typeof BookModel,
+  ) {}
+
+  async addBookToCollection(collectionId: number, bookId: number) {
+    try {
+      const [collection, book] = await Promise.all([
+        this.collectionModel.findByPk(collectionId),
+        this.bookModel.findByPk(bookId),
+      ]);
+
+      if (!collection || !book) {
+        throw new NotFoundException(ERROR_CONSTANT.COLLECTION.NOT_FOUND);
+      }
+
+      const bookAlreadyExists = await collection.$has('books', book);
+
+      if (bookAlreadyExists) {
+        throw new BadRequestException(ERROR_CONSTANT.COLLECTION.BOOK_EXISTS);
+      }
+
+      await collection.$add('books', book);
+    } catch (error) {
+      console.log('Error while adding book to collection:', error);
+      if (
+        error instanceof NotFoundException ||
+        error instanceof BadRequestException
+      ) {
+        throw error;
+      }
+      throw new BadRequestException(ERROR_CONSTANT.COLLECTION.ADD_BOOK_FAILED);
+    }
   }
 
-  findAll() {
-    return `This action returns all collection`;
+  async getCollectionBooks(collectionId: number) {
+    try {
+      const collection = await this.collectionModel.findByPk(collectionId, {
+        include: [BookModel],
+      });
+      return collection?.books || [];
+    } catch (error) {
+      console.log('Error while fetching books in collection:', error);
+      throw new InternalServerErrorException(
+        ERROR_CONSTANT.COLLECTION.GET_FAILED,
+      );
+    }
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} collection`;
+  async removeBookFromCollection(collectionId: number, bookId: number) {
+    try {
+      const [collection, book] = await Promise.all([
+        this.collectionModel.findByPk(collectionId),
+        this.bookModel.findByPk(bookId),
+      ]);
+
+      if (!collection || !book) {
+        throw new NotFoundException(ERROR_CONSTANT.COLLECTION.NOT_FOUND);
+      }
+
+      const bookAlreadyExists = await collection.$has('books', book);
+
+      if (!bookAlreadyExists) {
+        throw new BadRequestException(ERROR_CONSTANT.COLLECTION.BOOK_NOT_IN);
+      }
+
+      await collection.$remove('books', book);
+    } catch (error) {
+      console.log('Error while removing book to collection:', error);
+      if (
+        error instanceof NotFoundException ||
+        error instanceof BadRequestException
+      ) {
+        throw error;
+      }
+      throw new BadRequestException(
+        ERROR_CONSTANT.COLLECTION.REMOVE_BOOK_FAILED,
+      );
+    }
   }
 
-  update(id: number, updateCollectionDto: UpdateCollectionDto) {
-    return `This action updates a #${id} collection`;
-  }
+  async createCollection() {}
 
-  remove(id: number) {
-    return `This action removes a #${id} collection`;
-  }
+  async getCollections() {}
+
+  async updateCollection() {}
+
+  async deleteCollection() {}
+
+  async shareCollection() {}
 }
