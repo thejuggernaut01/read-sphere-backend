@@ -1,6 +1,6 @@
-enum Visibility {
+enum VISIBILITY {
   PUBLIC = 'public',
   PRIVATE = 'private',
 }
 
-export { Visibility };
+export { VISIBILITY };
