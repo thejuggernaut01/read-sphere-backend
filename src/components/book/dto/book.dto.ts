@@ -12,7 +12,7 @@ import {
   MinLength,
 } from 'class-validator';
 import { BOOK_VALIDATION_MSG } from '../constants/book-validation-messages';
-import { OmitType, PartialType } from '@nestjs/mapped-types';
+import { PartialType } from '@nestjs/mapped-types';
 
 const {
   TITLE,
@@ -26,7 +26,6 @@ const {
   PG,
   ISBN13,
   PUBLICATION_DATE,
-  UPLOADED_AT,
 } = BOOK_VALIDATION_MSG;
 
 export class CreateBookDto {
@@ -85,13 +84,6 @@ export class CreateBookDto {
   @IsNotEmpty({ message: PUBLICATION_DATE.IS_NOT_EMPTY })
   @Type(() => Date)
   publicationDate: Date;
-
-  @IsDate({ message: UPLOADED_AT.IS_DATE })
-  @IsNotEmpty({ message: UPLOADED_AT.IS_NOT_EMPTY })
-  @Type(() => Date)
-  uploadedAt: Date;
 }
 
-export class UpdateBookDto extends PartialType(
-  OmitType(CreateBookDto, ['uploadedAt'] as const),
-) {}
+export class UpdateBookDto extends PartialType(CreateBookDto) {}

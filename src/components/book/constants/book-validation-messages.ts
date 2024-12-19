@@ -54,10 +54,6 @@ const BOOK_VALIDATION_MSG = {
     IS_DATE: 'Publication date must be a date',
     IS_NOT_EMPTY: 'Publication date is required',
   },
-  UPLOADED_AT: {
-    IS_DATE: 'Uploaded at must be a date',
-    IS_NOT_EMPTY: 'Uploaded at is required',
-  },
 };
 
 export { BOOK_VALIDATION_MSG };

@@ -10,10 +10,9 @@ interface ICreateBook {
   pg: number;
   isbn13: string;
   publicationDate: Date;
-  uploadedAt: Date;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
-interface IUpdateBook extends Partial<Omit<ICreateBook, 'uploadedAt'>> {}
+interface IUpdateBook extends Partial<ICreateBook> {}
 
 export { ICreateBook, IUpdateBook };
