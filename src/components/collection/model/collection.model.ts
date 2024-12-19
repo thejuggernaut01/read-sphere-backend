@@ -16,7 +16,7 @@ import {
   UpdatedAt,
 } from 'sequelize-typescript';
 import { UserModel } from '../../user/model/user.model';
-import { Visibility } from '../../../common/enum/collection';
+import { VISIBILITY } from '../../../common/enum/collection';
 import { BookModel } from '../../book/model/book.model';
 import { CollectionBooksModel } from './collection-books.model';
 
@@ -49,9 +49,9 @@ export class CollectionModel extends Model<CollectionModel> {
   @AllowNull(false)
   @Column({
     type: DataType.ENUM('public', 'private'),
-    defaultValue: Visibility.PRIVATE,
+    defaultValue: VISIBILITY.PRIVATE,
   })
-  visibility: Visibility;
+  visibility: VISIBILITY;
 
   @AllowNull(false)
   @CreatedAt

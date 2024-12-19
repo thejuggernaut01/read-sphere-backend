@@ -42,7 +42,7 @@ export const ERROR_CONSTANT = {
     GET_FAILED: 'Failed to get book collection',
     DELETE_FAILED: 'Failed to delete book collection',
     UPDATE_FAILED: 'Failed to update book collection',
-    NOT_FOUND: 'Collection or book not found',
+    NOT_FOUND: 'Collection not found',
     BOOK_EXISTS: 'Book already exists in the collection',
     ADD_BOOK_FAILED: 'Failed to add book to collection',
     REMOVE_BOOK_FAILED: 'Failed to remove book from collection',

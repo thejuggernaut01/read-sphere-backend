@@ -8,6 +8,8 @@ import { InjectModel } from '@nestjs/sequelize';
 import { CollectionModel } from './model/collection.model';
 import { BookModel } from '../book/model/book.model';
 import { ERROR_CONSTANT } from 'src/common/constants/error.constant';
+import { ICreateCollection, IUpdateCollection } from './interface';
+import { VISIBILITY } from 'src/common/enum/collection';
 
 @Injectable()
 export class CollectionService {
@@ -18,26 +20,47 @@ export class CollectionService {
     @InjectModel(BookModel) private readonly bookModel: typeof BookModel,
   ) {}
 
-  async addBookToCollection(collectionId: number, bookId: number) {
+  // /collections/:id/books
+  async addBookToCollection(
+    userId: number,
+    collectionId: number,
+    bookId: number[],
+  ) {
+    const transaction = await this.collectionModel.sequelize.transaction();
+
     try {
-      const [collection, book] = await Promise.all([
-        this.collectionModel.findByPk(collectionId),
-        this.bookModel.findByPk(bookId),
+      const [collection, books] = await Promise.all([
+        this.collectionModel.findOne({
+          where: {
+            id: collectionId,
+            userId,
+          },
+        }),
+        this.bookModel.findAll({ where: { id: bookId } }),
       ]);
 
-      if (!collection || !book) {
+      if (!collection) {
         throw new NotFoundException(ERROR_CONSTANT.COLLECTION.NOT_FOUND);
       }
 
-      const bookAlreadyExists = await collection.$has('books', book);
+      if (books.length !== bookId.length) {
+        throw new NotFoundException(ERROR_CONSTANT.COLLECTION.NOT_FOUND);
+      }
 
-      if (bookAlreadyExists) {
+      const alreadyAddedBooks = await collection.$get('books', {
+        where: { id: bookId },
+      });
+
+      if (alreadyAddedBooks.length > 0) {
         throw new BadRequestException(ERROR_CONSTANT.COLLECTION.BOOK_EXISTS);
       }
 
-      await collection.$add('books', book);
+      await collection.$add('books', books, { transaction });
+      await transaction.commit();
+      return;
     } catch (error) {
-      console.log('Error while adding book to collection:', error);
+      await transaction.commit();
+      console.log('Error while adding books to collection:', error);
       if (
         error instanceof NotFoundException ||
         error instanceof BadRequestException
@@ -62,25 +85,40 @@ export class CollectionService {
     }
   }
 
-  async removeBookFromCollection(collectionId: number, bookId: number) {
+  async removeBookFromCollection(
+    userId: number,
+    collectionId: number,
+    bookId: number[],
+  ) {
+    const transaction = await this.collectionModel.sequelize.transaction();
     try {
-      const [collection, book] = await Promise.all([
-        this.collectionModel.findByPk(collectionId),
-        this.bookModel.findByPk(bookId),
+      const [collection, books] = await Promise.all([
+        this.collectionModel.findOne({
+          where: {
+            id: collectionId,
+            userId,
+          },
+        }),
+        this.bookModel.findAll({ where: { id: bookId } }),
       ]);
 
-      if (!collection || !book) {
+      if (!collection) {
         throw new NotFoundException(ERROR_CONSTANT.COLLECTION.NOT_FOUND);
       }
 
-      const bookAlreadyExists = await collection.$has('books', book);
+      const alreadyAddedBooks = await collection.$get('books', {
+        where: { id: bookId },
+      });
 
-      if (!bookAlreadyExists) {
+      if (alreadyAddedBooks.length === 0) {
         throw new BadRequestException(ERROR_CONSTANT.COLLECTION.BOOK_NOT_IN);
       }
 
-      await collection.$remove('books', book);
+      await collection.$remove('books', books, { transaction });
+      await transaction.commit();
+      return;
     } catch (error) {
+      await transaction.rollback();
       console.log('Error while removing book to collection:', error);
       if (
         error instanceof NotFoundException ||
@@ -94,13 +132,127 @@ export class CollectionService {
     }
   }
 
-  async createCollection() {}
+  async createCollectionWithBooks(
+    userId: number,
+    collectionData: ICreateCollection,
+    bookIds: number[],
+  ) {
+    const transaction = await this.collectionModel.sequelize.transaction();
 
-  async getCollections() {}
+    try {
+      const collection = await CollectionModel.create(
+        {
+          userId,
+          name: collectionData.name,
+          description: collectionData.description,
+          visibility: collectionData.visibility,
+        },
+        { transaction },
+      );
 
-  async updateCollection() {}
+      const books = await this.bookModel.findAll({
+        where: {
+          id: bookIds,
+        },
+      });
 
-  async deleteCollection() {}
+      if (books.length !== bookIds.length) {
+        throw new NotFoundException(ERROR_CONSTANT.BOOK.NOT_FOUND);
+      }
+
+      await collection.$add('books', books, { transaction });
+
+      await transaction.commit();
+      return collection;
+    } catch (error) {
+      await transaction.rollback();
+      console.error('Error while creating collection:', error);
+
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new InternalServerErrorException(
+        ERROR_CONSTANT.COLLECTION.CREATE_FAILED,
+      );
+    }
+  }
+
+  async getCollections(userId: number) {
+    try {
+      const collection = await this.collectionModel.findAll({
+        where: {
+          userId,
+          visibility: VISIBILITY.PUBLIC,
+        },
+      });
+      return collection;
+    } catch (error) {
+      console.log('Error while fetching collection:', error);
+      throw new InternalServerErrorException(
+        ERROR_CONSTANT.COLLECTION.GET_FAILED,
+      );
+    }
+  }
+
+  async updateCollection(
+    userId: number,
+    collectionId: number,
+    payload: IUpdateCollection,
+  ) {
+    try {
+      const [rowsUpdated, [updatedCollection]] =
+        await this.collectionModel.update(payload, {
+          where: {
+            id: collectionId,
+            userId,
+          },
+          returning: true,
+        });
+
+      if (rowsUpdated === 0) {
+        throw new NotFoundException(ERROR_CONSTANT.COLLECTION.NOT_FOUND);
+      }
+
+      return updatedCollection;
+    } catch (error) {
+      console.error('Error while updating collection:', error);
+
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+
+      throw new InternalServerErrorException(
+        ERROR_CONSTANT.COLLECTION.UPDATE_FAILED,
+      );
+    }
+  }
 
   async shareCollection() {}
+
+  async deleteCollection(userId: number, collectionId: number) {
+    try {
+      const rowsDeleted = await this.collectionModel.destroy({
+        where: {
+          id: collectionId,
+          userId,
+        },
+      });
+
+      if (rowsDeleted === 0) {
+        throw new NotFoundException(ERROR_CONSTANT.COLLECTION.NOT_FOUND);
+      }
+
+      return;
+    } catch (error) {
+      console.error('Error while updating collection:', error);
+
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+
+      throw new InternalServerErrorException(
+        ERROR_CONSTANT.COLLECTION.UPDATE_FAILED,
+      );
+    }
+  }
 }
