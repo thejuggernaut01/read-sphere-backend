@@ -7,10 +7,7 @@ import { UserModule } from '../user/user.module';
 import { CollectionBooksModel } from './model/collection-books.model';
 
 @Module({
-  imports: [
-    SequelizeModule.forFeature([CollectionModel, CollectionBooksModel]),
-    UserModule,
-  ],
+  imports: [SequelizeModule.forFeature([CollectionModel]), UserModule],
   controllers: [CollectionController],
   providers: [CollectionService],
 })
