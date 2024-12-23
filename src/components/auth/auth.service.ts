@@ -16,7 +16,7 @@ import { BaseHelper } from '../../common/utils/helper.utils';
 import { ERROR_CONSTANT } from '../../common/constants/error.constant';
 import { OtpService } from '../otp/otp.service';
 import { InjectQueue } from '@nestjs/bullmq';
-import { QUEUE_NAME } from 'src/common/constants/queue.constant';
+import { QUEUE_NAME } from '../../common/constants/queue.constant';
 import { Queue } from 'bullmq';
 import { AUTH_JOB_NAMES } from './enum';
 

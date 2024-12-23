@@ -8,7 +8,7 @@ import {
 import { Request, Response } from 'express';
 import { ERROR_CONSTANT } from '../constants/error.constant';
 import { BaseHelper } from '../utils/helper.utils';
-import { UserService } from 'src/components/user/user.service';
+import { UserService } from '../../components/user/user.service';
 import * as jwt from 'jsonwebtoken';
 import { IDecodedToken } from '../types';
 

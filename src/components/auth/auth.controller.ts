@@ -4,7 +4,7 @@ import { SerializeResponse } from '../../common/interceptors/response-serializer
 import { ResponseMessage } from '../../common/decorator/response.decorator';
 import { RESPONSE_CONSTANT } from '../../common/constants/response.constant';
 import { Response } from 'express';
-import { BaseHelper } from 'src/common/utils/helper.utils';
+import { BaseHelper } from '../../common/utils/helper.utils';
 import { UserResponse } from '../user/transformers/user-response.transformer';
 import {
   CreateUserDto,

@@ -6,40 +6,96 @@ import {
   Patch,
   Param,
   Delete,
+  Req,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { CollectionService } from './collection.service';
-import { CreateCollectionDto } from './dto/collection.dto';
-import { UpdateCollectionDto } from './dto/update-collection.dto';
+import {
+  BookIdsDto,
+  CreateCollectionDto,
+  UpdateCollectionDto,
+} from './dto/collection.dto';
+import { Request } from 'express';
+import { ResponseMessage } from '../../common/decorator/response.decorator';
+import { RESPONSE_CONSTANT } from '../../common/constants/response.constant';
 
-@Controller('collection')
+@Controller('collections')
 export class CollectionController {
   constructor(private readonly collectionService: CollectionService) {}
 
-  @Post()
-  create(@Body() createCollectionDto: CreateCollectionDto) {
-    console.log(createCollectionDto);
+  @Get('my')
+  async getMyCollections(@Req() req: Request) {
+    const userId = req.currentUser.id;
+    return await this.collectionService.getMyCollections(userId);
   }
 
-  @Get()
-  findAll() {
-    console.log();
+  @ResponseMessage(RESPONSE_CONSTANT.COLLECTION.CREATE_SUCCESS)
+  @Post('')
+  async createCollectionWithBooks(
+    @Req() req: Request,
+    @Body() payload: CreateCollectionDto & BookIdsDto,
+  ) {
+    const userId = req?.currentUser.id;
+    const { bookIds, ...collectionData } = payload;
+    return await this.collectionService.createCollectionWithBooks(
+      userId,
+      collectionData,
+      bookIds,
+    );
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    console.log(+id);
+  @ResponseMessage(RESPONSE_CONSTANT.COLLECTION.ADD_BOOK_SUCCESS)
+  @Patch(':collectionId/book')
+  async addBookToCollection(
+    @Req() req: Request,
+    @Param('collectionId', ParseIntPipe) collectionId: number,
+    @Body() payload: BookIdsDto,
+  ) {
+    const userId = req?.currentUser.id;
+    return await this.collectionService.addBookToCollection(
+      userId,
+      collectionId,
+      payload.bookIds,
+    );
   }
 
-  @Patch(':id')
-  update(
-    @Param('id') id: string,
+  @ResponseMessage(RESPONSE_CONSTANT.COLLECTION.REMOVE_BOOK_SUCCESS)
+  @Delete(':collectionId/book')
+  async removeBookFromCollection(
+    @Req() req: Request,
+    @Param('collectionId', ParseIntPipe) collectionId: number,
+    @Body() payload: BookIdsDto,
+  ) {
+    const userId = req?.currentUser.id;
+    return await this.collectionService.removeBookFromCollection(
+      userId,
+      collectionId,
+      payload.bookIds,
+    );
+  }
+
+  @ResponseMessage(RESPONSE_CONSTANT.COLLECTION.UPDATE_SUCCESS)
+  @Patch(':collectionId')
+  async updateCollection(
+    @Req() req: Request,
+    @Param('collectionId', ParseIntPipe) collectionId: number,
     @Body() updateCollectionDto: UpdateCollectionDto,
   ) {
-    console.log(+id, updateCollectionDto);
+    const userId = req?.currentUser.id;
+    return await this.collectionService.updateCollection(
+      userId,
+      collectionId,
+      updateCollectionDto,
+    );
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    console.log(+id);
+  @ResponseMessage(RESPONSE_CONSTANT.COLLECTION.DELETE_SUCCESS)
+  @Delete(':collectionId')
+  async deleteCollection(
+    @Req() req: Request,
+    @Param('collectionId', ParseIntPipe) collectionId: number,
+  ) {
+    const userId = req?.currentUser.id;
+    return await this.collectionService.deleteCollection(userId, collectionId);
   }
 }

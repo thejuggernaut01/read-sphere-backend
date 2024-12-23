@@ -1,7 +1,6 @@
 import { VISIBILITY } from '../../../common/enum/collection';
 
 interface ICreateCollection {
-  userId: number;
   name: string;
   description: string;
   visibility: VISIBILITY;

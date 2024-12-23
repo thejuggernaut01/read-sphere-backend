@@ -31,14 +31,12 @@ export const RESPONSE_CONSTANT = {
     RETRIEVE_USER_SUCCESS: 'Your books retrieved successfully',
   },
   COLLECTION: {
-    CREATE_COLLECTION_SUCCESS: 'Book collection created successfully',
-    DELETE_COLLECTION_SUCCESS: 'Book collection deleted successfully',
-    UPDATE_COLLECTION_SUCCESS: 'Book collection updated successfully',
-    ADD_BOOK_TO_COLLECTION_SUCCESS:
-      'Book added to your collection successfully',
-    REMOVE_BOOK_FROM_COLLECTION_SUCCESS:
-      'Book removed from the collection successfully',
-    COLLECTION_NOT_FOUND: 'Book collection not found',
+    GET_SUCCESS: 'Book collection retrieved successfully',
+    CREATE_SUCCESS: 'Book collection created successfully',
+    DELETE_SUCCESS: 'Book collection deleted successfully',
+    UPDATE_SUCCESS: 'Book collection updated successfully',
+    ADD_BOOK_SUCCESS: 'Book added to your collection successfully',
+    REMOVE_BOOK_SUCCESS: 'Book removed from the collection successfully',
   },
   READING_LIST: {
     CREATE_READING_LIST_SUCCESS: 'Reading list created successfully',
