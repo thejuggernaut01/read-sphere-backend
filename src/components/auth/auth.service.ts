@@ -1,6 +1,7 @@
 import {
   ConflictException,
   Injectable,
+  InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
 import { UserService } from '../user/user.service';
@@ -19,6 +20,9 @@ import { InjectQueue } from '@nestjs/bullmq';
 import { QUEUE_NAME } from '../../common/constants/queue.constant';
 import { Queue } from 'bullmq';
 import { AUTH_JOB_NAMES } from './enum';
+import { InjectModel } from '@nestjs/sequelize';
+import { UserModel } from '../user/model/user.model';
+import { Transaction } from 'sequelize';
 
 @Injectable()
 export class AuthService {
@@ -26,33 +30,73 @@ export class AuthService {
     private usersService: UserService,
     private otpService: OtpService,
     @InjectQueue(QUEUE_NAME.AUTH) private readonly authEmailQueue: Queue,
+    @InjectModel(UserModel) private readonly userModel: typeof UserModel,
   ) {}
 
   async signup(payload: ICreateUser) {
-    const existingUser = await this.usersService.findUserByEmail(payload.email);
+    const transaction: Transaction =
+      await this.userModel.sequelize.transaction();
 
-    if (existingUser) {
-      throw new ConflictException(ERROR_CONSTANT.AUTH.USER_EXISTS);
+    try {
+      const existingUser = await this.userModel.findOne({
+        where: { email: payload.email },
+      });
+
+      if (existingUser) {
+        throw new ConflictException(ERROR_CONSTANT.AUTH.USER_EXISTS);
+      }
+
+      const hashedPassword = await BaseHelper.hashData(payload.password);
+
+      const user = this.userModel.build({
+        ...payload,
+        password: hashedPassword,
+      });
+      await user.save({ transaction });
+
+      transaction.afterCommit(async () => {
+        try {
+          console.log('Transaction committed for user ID:', user.id);
+
+          const code = await this.otpService.createOtp(user.id);
+          console.log('OTP created for user ID:', user.id);
+
+          await this.authEmailQueue.add(
+            AUTH_JOB_NAMES.SEND_VERIFICATION_EMAIL,
+            {
+              subject: 'Verify your email',
+              code,
+              user: {
+                email: user.email,
+                firstName: user.firstName,
+                lastName: user.lastName,
+              },
+            },
+          );
+          console.log(
+            `Verification email queued for user ID: ${user.id}, Email: ${user.email}`,
+          );
+        } catch (error) {
+          console.error(
+            `Error in afterCommit hook for user ID: ${user.id}`,
+            error,
+          );
+        }
+      });
+
+      await transaction.commit();
+    } catch (error) {
+      await transaction.rollback();
+      console.error('Error while signing up user:', error);
+
+      if (error instanceof ConflictException) {
+        throw error;
+      }
+
+      throw new InternalServerErrorException(
+        ERROR_CONSTANT.AUTH.REGISTER_FAILED,
+      );
     }
-
-    const hashedPassword = await BaseHelper.hashData(payload.password);
-
-    const user = await this.usersService.createUser({
-      ...payload,
-      password: hashedPassword,
-    });
-
-    const code = await this.otpService.createOtp(user.id);
-
-    await this.authEmailQueue.add(AUTH_JOB_NAMES.SEND_VERIFICATION_EMAIL, {
-      subject: 'Verify your email',
-      code,
-      user: {
-        email: user.email,
-        firstName: user.firstName,
-        lastName: user.lastName,
-      },
-    });
   }
 
   async login(payload: ILogin) {
