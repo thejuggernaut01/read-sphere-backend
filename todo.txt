@@ -1,0 +1,9 @@
+1. Logging and Monitoring
+2. Cache frequently accessed data
+3. Implement pre-signed urls for book upload
+4. Implement pagination
+5. Implement Rate limit & retry logic where needed
+6. Write tests
+7. Test book endpoints
+8. Collection book endpoints
+9. Circle's feature

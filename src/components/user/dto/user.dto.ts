@@ -1,12 +1,11 @@
 import { Type } from 'class-transformer';
 import {
-  IsDate,
+  IsBoolean,
   IsEmail,
   IsInt,
   IsNotEmpty,
   IsString,
   IsStrongPassword,
-  // Length,
   MaxLength,
   MinLength,
 } from 'class-validator';
@@ -18,7 +17,7 @@ const {
   USER_NAME,
   EMAIL,
   PASSWORD,
-  TERMS_ACCEPTED_AT,
+  TERMS_ACCEPTED,
   CODE,
 } = AUTH_VALIDATION_MSG;
 
@@ -62,10 +61,10 @@ class CreateUserDto {
   )
   password: string;
 
-  @IsDate({ message: TERMS_ACCEPTED_AT.IS_DATE })
-  @IsNotEmpty({ message: TERMS_ACCEPTED_AT.IS_NOT_EMPTY })
-  @Type(() => Date)
-  termsAcceptedAt: Date;
+  @IsBoolean({ message: TERMS_ACCEPTED.IS_BOOLEAN })
+  @IsNotEmpty({ message: TERMS_ACCEPTED.IS_NOT_EMPTY })
+  @Type(() => Boolean)
+  termsAccepted: boolean;
 }
 
 class LoginDto {

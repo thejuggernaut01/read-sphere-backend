@@ -4,7 +4,6 @@ import {
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
-import { UserService } from '../user/user.service';
 import {
   ICreateUser,
   ILogin,
@@ -22,12 +21,11 @@ import { Queue } from 'bullmq';
 import { AUTH_JOB_NAMES } from './enum';
 import { InjectModel } from '@nestjs/sequelize';
 import { UserModel } from '../user/model/user.model';
-import { Transaction } from 'sequelize';
+import { Op, Transaction } from 'sequelize';
 
 @Injectable()
 export class AuthService {
   constructor(
-    private usersService: UserService,
     private otpService: OtpService,
     @InjectQueue(QUEUE_NAME.AUTH) private readonly authEmailQueue: Queue,
     @InjectModel(UserModel) private readonly userModel: typeof UserModel,
@@ -48,11 +46,10 @@ export class AuthService {
 
       const hashedPassword = await BaseHelper.hashData(payload.password);
 
-      const user = this.userModel.build({
-        ...payload,
-        password: hashedPassword,
-      });
-      await user.save({ transaction });
+      const user = await this.userModel.create(
+        { ...payload, password: hashedPassword },
+        { transaction },
+      );
 
       transaction.afterCommit(async () => {
         try {
@@ -100,103 +97,172 @@ export class AuthService {
   }
 
   async login(payload: ILogin) {
-    const user = await this.usersService.findUserByEmail(payload.email);
+    try {
+      const user = await this.userModel.findOne({
+        where: { email: payload.email },
+      });
 
-    if (!user) {
-      throw new NotFoundException(ERROR_CONSTANT.AUTH.USER_DOES_NOT_EXIST);
+      if (!user) {
+        throw new NotFoundException(ERROR_CONSTANT.AUTH.USER_DOES_NOT_EXIST);
+      }
+
+      const isPasswordValid = await BaseHelper.compareHashedData(
+        payload.password,
+        user.password,
+      );
+
+      if (!isPasswordValid) {
+        throw new NotFoundException(ERROR_CONSTANT.AUTH.LOGIN_FAILED);
+      }
+
+      const accessToken = BaseHelper.generateJwtAccessToken(user.id);
+      const refreshToken = BaseHelper.generateJwtRefreshToken(user.id);
+
+      await user.update({ refreshToken });
+
+      return { ...user.dataValues, accessToken, refreshToken };
+    } catch (error) {
+      console.log('Error while logging user in');
+
+      if (error instanceof NotFoundException) throw error;
+
+      throw new InternalServerErrorException(ERROR_CONSTANT.AUTH.LOGIN_FAILED);
     }
-
-    const isPasswordValid = await BaseHelper.compareHashedData(
-      payload.password,
-      user.password,
-    );
-
-    if (!isPasswordValid) {
-      throw new NotFoundException(ERROR_CONSTANT.AUTH.LOGIN_FAILED);
-    }
-
-    const accessToken = BaseHelper.generateJwtAccessToken(user.id);
-    const refreshToken = BaseHelper.generateJwtRefreshToken(user.id);
-
-    await this.usersService.updateUserRefreshToken(user.email, refreshToken);
-
-    return { ...user.dataValues, accessToken, refreshToken };
   }
 
   async verifyEmail(payload: IVerifyEmail) {
-    const user = await this.usersService.findUserByEmail(payload.email);
+    try {
+      const user = await this.userModel.findOne({
+        where: { email: payload.email },
+      });
 
-    if (!user) {
-      throw new NotFoundException(ERROR_CONSTANT.AUTH.USER_DOES_NOT_EXIST);
+      if (!user) {
+        throw new NotFoundException(ERROR_CONSTANT.AUTH.USER_DOES_NOT_EXIST);
+      }
+
+      await this.otpService.verifyOTP({
+        userId: user.id,
+        code: payload.code,
+      });
+
+      // Update the user's email verification status
+      user.emailVerified = true;
+      await user.save();
+
+      await this.authEmailQueue.add(AUTH_JOB_NAMES.SEND_WELCOME_EMAIL, {
+        subject: 'Welcome to Read Sphere',
+        user: {
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+        },
+      });
+    } catch (error) {
+      console.log('Error while verifying user', error);
+      if (error instanceof NotFoundException) throw error;
+
+      throw new InternalServerErrorException(
+        ERROR_CONSTANT.AUTH.EMAIL_VERIFICATION_FAILED,
+      );
     }
-
-    await this.otpService.verifyOTP({
-      userId: user.id,
-      code: payload.code,
-    });
-
-    // Update the user's email verification status
-    user.emailVerified = true;
-    await user.save();
-
-    await this.authEmailQueue.add(AUTH_JOB_NAMES.SEND_WELCOME_EMAIL, {
-      subject: 'Welcome to Read Sphere',
-      user: {
-        email: user.email,
-        firstName: user.firstName,
-        lastName: user.lastName,
-      },
-    });
   }
 
   async resendVerifyEmail(payload: IResendVerifyEmail) {
-    const user = await this.usersService.findUserByEmail(payload.email);
+    try {
+      const user = await this.userModel.findOne({
+        where: { email: payload.email },
+      });
 
-    if (!user) {
-      throw new NotFoundException(ERROR_CONSTANT.AUTH.USER_DOES_NOT_EXIST);
+      if (!user) {
+        throw new NotFoundException(ERROR_CONSTANT.AUTH.USER_DOES_NOT_EXIST);
+      }
+
+      const code = await this.otpService.createOtp(user.id);
+
+      await this.authEmailQueue.add(AUTH_JOB_NAMES.SEND_VERIFICATION_EMAIL, {
+        subject: 'Verify your email',
+        code,
+        user: {
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+        },
+      });
+    } catch (error) {
+      console.log('Error while resending verification email', error);
+      if (error instanceof NotFoundException) throw error;
+
+      throw new InternalServerErrorException(
+        ERROR_CONSTANT.AUTH.RESEND_VERIFICATION_EMAIL_FAILED,
+      );
     }
-
-    const code = await this.otpService.createOtp(user.id);
-
-    await this.authEmailQueue.add(AUTH_JOB_NAMES.SEND_VERIFICATION_EMAIL, {
-      subject: 'Verify your email',
-      code,
-      user: {
-        email: user.email,
-        firstName: user.firstName,
-        lastName: user.lastName,
-      },
-    });
   }
 
   async forgotPassword(payload: IForgotPassword) {
-    const user = await this.usersService.findUserByEmail(payload.email);
+    try {
+      const user = await this.userModel.findOne({
+        where: { email: payload.email },
+      });
 
-    if (!user) {
-      throw new NotFoundException(ERROR_CONSTANT.AUTH.USER_DOES_NOT_EXIST);
+      if (!user) {
+        throw new NotFoundException(ERROR_CONSTANT.AUTH.USER_DOES_NOT_EXIST);
+      }
+
+      const code = await this.otpService.createOtp(user.id);
+
+      await this.authEmailQueue.add(AUTH_JOB_NAMES.SEND_FORGOT_PASSWORD_EMAIL, {
+        subject: 'Reset your Read Sphere account password',
+        code,
+        user: {
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+        },
+      });
+    } catch (error) {
+      console.log('Error while verifying user email for password reset', error);
+      if (error instanceof NotFoundException) throw error;
+
+      throw new InternalServerErrorException(
+        ERROR_CONSTANT.AUTH.PASSWORD_RESET_FAILED,
+      );
     }
-
-    const code = await this.otpService.createOtp(user.id);
-
-    await this.authEmailQueue.add(AUTH_JOB_NAMES.SEND_FORGOT_PASSWORD_EMAIL, {
-      subject: 'Reset your Read Sphere account password',
-      code,
-      user: {
-        email: user.email,
-        firstName: user.firstName,
-        lastName: user.lastName,
-      },
-    });
   }
 
   async resetPassword(payload: IResetPassword) {
-    const { token, password } = payload;
+    try {
+      const { token, password } = payload;
 
-    const hashedPassword = await BaseHelper.hashData(password);
+      const hashedPassword = await BaseHelper.hashData(password);
 
-    await this.usersService.findAndUpdateUserByResetToken(
-      token,
-      hashedPassword,
-    );
+      const user = await this.userModel.findOne({
+        where: {
+          resetPasswordToken: token,
+          resetPasswordTokenExpiration: {
+            [Op.gt]: new Date(), // Ensure the token has not expired
+          },
+        },
+      });
+
+      if (!user) {
+        throw new NotFoundException(ERROR_CONSTANT.GENERAL.TOKEN);
+      }
+
+      await user.update({
+        resetPasswordToken: null,
+        resetPasswordTokenExpiration: null,
+        password: hashedPassword,
+      });
+
+      return user;
+    } catch (error) {
+      console.log('Error while resetting password', error);
+
+      if (error instanceof NotFoundException) throw error;
+
+      throw new InternalServerErrorException(
+        ERROR_CONSTANT.AUTH.PASSWORD_RESET_FAILED,
+      );
+    }
   }
 }

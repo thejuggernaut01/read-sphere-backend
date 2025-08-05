@@ -1,88 +1,13 @@
-import {
-  Injectable,
-  InternalServerErrorException,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { UserModel } from './model/user.model';
-import { Transaction } from 'sequelize';
 import { ERROR_CONSTANT } from '../../common/constants/error.constant';
-import { Op } from 'sequelize';
-
-import { ICreateUser } from './interface';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectModel(UserModel) private readonly userModel: typeof UserModel,
   ) {}
-
-  async createUser(payload: ICreateUser) {
-    const transaction: Transaction =
-      await this.userModel.sequelize.transaction();
-
-    try {
-      const user = this.userModel.build(payload);
-      await user.save({ transaction });
-      await transaction.commit();
-      return user;
-    } catch (error) {
-      await transaction.rollback();
-      console.error('Error while creating user:', error);
-      throw new InternalServerErrorException(
-        ERROR_CONSTANT.AUTH.REGISTER_FAILED,
-      );
-    }
-  }
-
-  async findUserByEmail(email: string) {
-    return this.userModel.findOne({ where: { email } });
-  }
-
-  async findAndUpdateUserByResetToken(token: string, password: string) {
-    const user = await this.userModel.findOne({
-      where: {
-        resetPasswordToken: token,
-        resetPasswordTokenExpiration: {
-          [Op.gt]: new Date(), // Ensure the token has not expired
-        },
-      },
-    });
-
-    if (!user) {
-      throw new NotFoundException(ERROR_CONSTANT.GENERAL.TOKEN);
-    }
-
-    await user.update({
-      resetPasswordToken: null,
-      resetPasswordTokenExpiration: null,
-      password: password,
-    });
-
-    return user;
-  }
-
-  async updateUserRefreshToken(email: string, token: string) {
-    const user = await this.findUserByEmail(email);
-
-    if (!user) {
-      throw new NotFoundException(ERROR_CONSTANT.AUTH.USER_DOES_NOT_EXIST);
-    }
-
-    await user.update({ refreshToken: token });
-
-    return user;
-  }
-
-  async deleteUser(email: string) {
-    const user = await this.findUserByEmail(email);
-
-    if (!user) {
-      throw new NotFoundException(ERROR_CONSTANT.AUTH.USER_DOES_NOT_EXIST);
-    }
-
-    await user.destroy();
-  }
 
   async findUserById(userId: number) {
     const user = await this.userModel.findByPk(userId);
@@ -92,6 +17,20 @@ export class UserService {
     }
 
     return user;
+  }
+
+  async findUserByEmail(email: string) {
+    return this.userModel.findOne({ where: { email } });
+  }
+
+  async deleteUser(email: string) {
+    const user = await this.userModel.findOne({ where: { email } });
+
+    if (!user) {
+      throw new NotFoundException(ERROR_CONSTANT.AUTH.USER_DOES_NOT_EXIST);
+    }
+
+    await user.destroy();
   }
 
   // async updateUserData(userId: number, data: Partial<UserModel>) {

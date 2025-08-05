@@ -15,6 +15,7 @@ import { CollectionModule } from './components/collection/collection.module';
 import { BullModule } from '@nestjs/bullmq';
 import { BullBoardModule } from '@bull-board/nestjs';
 import { ExpressAdapter } from '@bull-board/express';
+import { CircleModule } from './components/circle/circle.module';
 
 @Module({
   imports: [
@@ -61,6 +62,7 @@ import { ExpressAdapter } from '@bull-board/express';
     OtpModule,
     MailModule,
     CollectionModule,
+    CircleModule,
   ],
   controllers: [AppController],
   providers: [AppService],

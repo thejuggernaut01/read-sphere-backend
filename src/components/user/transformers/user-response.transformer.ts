@@ -29,7 +29,7 @@ export class UserResponse {
   password: string;
 
   @Exclude()
-  termsAcceptedAt: string;
+  termsAccepted: boolean;
 
   @Exclude()
   refreshToken: string;

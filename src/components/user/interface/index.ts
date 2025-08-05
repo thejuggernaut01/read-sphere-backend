@@ -4,7 +4,7 @@ interface ICreateUser {
   userName: string;
   email: string;
   password: string;
-  termsAcceptedAt: Date;
+  termsAccepted: boolean;
 }
 
 interface IUpdateUser {

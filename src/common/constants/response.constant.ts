@@ -33,6 +33,7 @@ export const RESPONSE_CONSTANT = {
   COLLECTION: {
     GET_SUCCESS: 'Book collection retrieved successfully',
     CREATE_SUCCESS: 'Book collection created successfully',
+    SHARE_SUCCESS: 'Book collection shared successfully',
     DELETE_SUCCESS: 'Book collection deleted successfully',
     UPDATE_SUCCESS: 'Book collection updated successfully',
     ADD_BOOK_SUCCESS: 'Book added to your collection successfully',

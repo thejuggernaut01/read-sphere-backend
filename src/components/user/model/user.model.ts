@@ -73,8 +73,8 @@ export class UserModel extends Model<UserModel> {
   coverImageUrl: string;
 
   @AllowNull(false)
-  @Column(DataType.DATE)
-  termsAcceptedAt: Date;
+  @Column(DataType.BOOLEAN)
+  termsAccepted: boolean;
 
   @AllowNull(true)
   @Default(false)

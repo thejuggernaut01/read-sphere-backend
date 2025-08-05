@@ -33,6 +33,7 @@ export class ResponseTransformerInterceptor<T>
           success: response.statusCode === 201 || response.statusCode === 200,
           data: data,
           message: responseMessage || 'Request successful',
+          successCode: response.statusCode,
         };
       }),
     );

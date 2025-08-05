@@ -6,6 +6,7 @@ import {
   IsArray,
   IsNotEmpty,
   IsNumber,
+  IsOptional,
   IsString,
   MaxLength,
   MinLength,
@@ -31,6 +32,12 @@ class CreateCollectionDto {
   @IsString({ message: VISIBILITY.IS_STRING })
   @IsNotEmpty({ message: VISIBILITY.IS_NOT_EMPTY })
   visibility: Visibility;
+
+  @IsArray({ message: 'Book ID must be an array' })
+  @ArrayUnique({ message: 'Book ID array must contain unique values' })
+  @IsNumber({}, { each: true, message: 'Each Book ID must be a number' })
+  @IsOptional()
+  bookIds?: number[];
 }
 
 class BookIdsDto {

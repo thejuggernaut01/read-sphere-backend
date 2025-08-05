@@ -20,7 +20,7 @@ export class CollectionService {
     @InjectModel(BookModel) private readonly bookModel: typeof BookModel,
   ) {}
 
-  async createCollectionWithBooks(
+  async createCollection(
     userId: number,
     collectionData: ICreateCollection,
     bookIds: number[],
@@ -31,12 +31,15 @@ export class CollectionService {
       const collection = await CollectionModel.create(
         {
           userId,
-          name: collectionData.name,
-          description: collectionData.description,
-          visibility: collectionData.visibility,
+          ...collectionData,
         },
         { transaction },
       );
+
+      if (bookIds.length === 0) {
+        await transaction.commit();
+        return collection;
+      }
 
       const books = await this.bookModel.findAll({
         where: {
@@ -48,7 +51,7 @@ export class CollectionService {
         throw new NotFoundException(ERROR_CONSTANT.BOOK.NOT_FOUND);
       }
 
-      await collection.$create('books', books, { transaction });
+      await collection.$set('books', books, { transaction });
 
       await transaction.commit();
       return collection;
@@ -95,15 +98,32 @@ export class CollectionService {
         where: { id: bookIds },
       });
 
+      // If we don't want user to be able to add already existing books
+      // to the collection
       if (alreadyAddedBooks.length > 0) {
         throw new BadRequestException(ERROR_CONSTANT.COLLECTION.BOOK_EXISTS);
       }
+
+      // This will add only books that does not exist in the collection,
+      // even if the already existing books were selected.
+      // This first approach works, but it depends on the frontend
+
+      // const alreadyAddedBookIdSet = new Set(
+      //   alreadyAddedBooks.map((book) => book.id),
+      // );
+      // const newBooks = books.filter(
+      //   (book) => !alreadyAddedBookIdSet.has(book.id),
+      // );
+
+      // if (newBooks.length === 0) {
+      //   throw new BadRequestException(ERROR_CONSTANT.COLLECTION.BOOK_EXISTS);
+      // }
 
       await collection.$add('books', books, { transaction });
       await transaction.commit();
       return;
     } catch (error) {
-      await transaction.commit();
+      await transaction.rollback();
       console.log('Error while adding books to collection:', error);
       if (
         error instanceof NotFoundException ||
@@ -229,14 +249,14 @@ export class CollectionService {
 
       return;
     } catch (error) {
-      console.error('Error while updating collection:', error);
+      console.error('Error while deleting collection:', error);
 
       if (error instanceof NotFoundException) {
         throw error;
       }
 
       throw new InternalServerErrorException(
-        ERROR_CONSTANT.COLLECTION.UPDATE_FAILED,
+        ERROR_CONSTANT.COLLECTION.DELETE_FAILED,
       );
     }
   }

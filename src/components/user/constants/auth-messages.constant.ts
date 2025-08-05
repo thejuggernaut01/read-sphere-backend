@@ -30,8 +30,8 @@ const AUTH_VALIDATION_MSG = {
     MAX_LENGTH: 'Password must be at most 20 characters long',
     IS_STRONG_PASSWORD: 'Password is not strong enough',
   },
-  TERMS_ACCEPTED_AT: {
-    IS_DATE: 'termsAcceptedAt must be a valid date or date string',
+  TERMS_ACCEPTED: {
+    IS_BOOLEAN: 'termsAccepted must be a boolean',
     IS_NOT_EMPTY: 'termsAcceptedAt is required',
   },
   CODE: {

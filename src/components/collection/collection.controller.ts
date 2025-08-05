@@ -23,8 +23,8 @@ import { RESPONSE_CONSTANT } from '../../common/constants/response.constant';
 export class CollectionController {
   constructor(private readonly collectionService: CollectionService) {}
 
-  @Get('my')
-  async getMyCollections(@Req() req: Request) {
+  @Get('')
+  async getCollections(@Req() req: Request) {
     const userId = req.currentUser.id;
     return await this.collectionService.getMyCollections(userId);
   }
@@ -33,11 +33,11 @@ export class CollectionController {
   @Post('')
   async createCollectionWithBooks(
     @Req() req: Request,
-    @Body() payload: CreateCollectionDto & BookIdsDto,
+    @Body() payload: CreateCollectionDto,
   ) {
     const userId = req?.currentUser.id;
-    const { bookIds, ...collectionData } = payload;
-    return await this.collectionService.createCollectionWithBooks(
+    const { bookIds = [], ...collectionData } = payload;
+    return await this.collectionService.createCollection(
       userId,
       collectionData,
       bookIds,
@@ -45,7 +45,7 @@ export class CollectionController {
   }
 
   @ResponseMessage(RESPONSE_CONSTANT.COLLECTION.ADD_BOOK_SUCCESS)
-  @Patch(':collectionId/book')
+  @Patch(':collectionId/books')
   async addBookToCollection(
     @Req() req: Request,
     @Param('collectionId', ParseIntPipe) collectionId: number,
@@ -53,21 +53,6 @@ export class CollectionController {
   ) {
     const userId = req?.currentUser.id;
     return await this.collectionService.addBookToCollection(
-      userId,
-      collectionId,
-      payload.bookIds,
-    );
-  }
-
-  @ResponseMessage(RESPONSE_CONSTANT.COLLECTION.REMOVE_BOOK_SUCCESS)
-  @Delete(':collectionId/book')
-  async removeBookFromCollection(
-    @Req() req: Request,
-    @Param('collectionId', ParseIntPipe) collectionId: number,
-    @Body() payload: BookIdsDto,
-  ) {
-    const userId = req?.currentUser.id;
-    return await this.collectionService.removeBookFromCollection(
       userId,
       collectionId,
       payload.bookIds,
@@ -86,6 +71,21 @@ export class CollectionController {
       userId,
       collectionId,
       updateCollectionDto,
+    );
+  }
+
+  @ResponseMessage(RESPONSE_CONSTANT.COLLECTION.REMOVE_BOOK_SUCCESS)
+  @Delete(':collectionId/books')
+  async removeBookFromCollection(
+    @Req() req: Request,
+    @Param('collectionId', ParseIntPipe) collectionId: number,
+    @Body() payload: BookIdsDto,
+  ) {
+    const userId = req?.currentUser.id;
+    return await this.collectionService.removeBookFromCollection(
+      userId,
+      collectionId,
+      payload.bookIds,
     );
   }
 

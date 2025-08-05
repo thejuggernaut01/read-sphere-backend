@@ -7,7 +7,6 @@ import {
 import { ICreateBook, IUpdateBook } from './interface';
 import { InjectModel } from '@nestjs/sequelize';
 import { BookModel } from './model/book.model';
-import { Transaction } from 'sequelize';
 import { ERROR_CONSTANT } from '../../common/constants/error.constant';
 
 @Injectable()
@@ -16,16 +15,12 @@ export class BookService {
     @InjectModel(BookModel) private readonly bookModel: typeof BookModel,
   ) {}
 
-  async createBook(payload: ICreateBook) {
-    const transaction: Transaction =
-      await this.bookModel.sequelize.transaction();
-
+  async createBook(payload: ICreateBook): Promise<BookModel> {
     try {
-      const book = this.bookModel.build(payload);
-      await book.save({ transaction });
-      await transaction.commit();
-
-      return;
+      return await this.bookModel.sequelize.transaction(async (transaction) => {
+        const book = await this.bookModel.create(payload, { transaction });
+        return book;
+      });
     } catch (error) {
       console.error('Error while creating book:', error);
       throw new InternalServerErrorException(ERROR_CONSTANT.BOOK.UPLOAD_FAILED);
@@ -52,14 +47,18 @@ export class BookService {
 
   async updateBook(bookId: number, payload: IUpdateBook) {
     try {
-      return await BookModel.update(
-        { id: bookId },
-        {
-          where: payload,
-        },
-      );
+      const [updatedCount] = await this.bookModel.update(payload, {
+        where: { id: bookId },
+      });
+
+      if (updatedCount === 0) {
+        throw new NotFoundException(ERROR_CONSTANT.BOOK.NOT_FOUND);
+      }
+
+      const updatedBook = await this.bookModel.findByPk(bookId);
+      return updatedBook;
     } catch (error) {
-      console.log('Error while updating book:', error);
+      console.error('Error while updating book:', error);
       throw new InternalServerErrorException(
         ERROR_CONSTANT.BOOK.UPDATE_DETAILS_FAILED,
       );
