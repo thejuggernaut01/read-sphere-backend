@@ -15,10 +15,13 @@ export class BookService {
     @InjectModel(BookModel) private readonly bookModel: typeof BookModel,
   ) {}
 
-  async createBook(payload: ICreateBook): Promise<BookModel> {
+  async createBook(payload: ICreateBook, userId: number): Promise<BookModel> {
     try {
       return await this.bookModel.sequelize.transaction(async (transaction) => {
-        const book = await this.bookModel.create(payload, { transaction });
+        const book = await this.bookModel.create(
+          { userId, ...payload },
+          { transaction },
+        );
         return book;
       });
     } catch (error) {
@@ -28,37 +31,79 @@ export class BookService {
   }
 
   async getAllBooks() {
-    return await this.bookModel.findAll();
+    try {
+      return await this.bookModel.findAll();
+    } catch (error) {
+      console.error('Error while retrieving books:', error);
+      throw new InternalServerErrorException(
+        ERROR_CONSTANT.BOOK.RETRIEVE_FALIED,
+      );
+    }
   }
 
   async getMyBooks(userId: number) {
-    return await this.bookModel.findAll({ where: { userId } });
+    try {
+      if (!userId) {
+        throw new BadRequestException(ERROR_CONSTANT.USER.NOT_FOUND);
+      }
+
+      return await this.bookModel.findAll({ where: { userId } });
+    } catch (error) {
+      console.error('Error while retrieving my books:', error);
+      if (error instanceof BadRequestException) throw error;
+
+      throw new InternalServerErrorException(
+        ERROR_CONSTANT.BOOK.RETRIEVE_FALIED,
+      );
+    }
   }
 
   async getBookDetails(bookId: number) {
-    const book = await this.bookModel.findByPk(bookId);
+    try {
+      if (!bookId) {
+        throw new NotFoundException(ERROR_CONSTANT.BOOK.ID_REQUIRED);
+      }
 
-    if (!book) {
-      throw new NotFoundException(ERROR_CONSTANT.BOOK.NOT_FOUND);
+      const book = await this.bookModel.findByPk(bookId);
+
+      if (!book) {
+        throw new NotFoundException(ERROR_CONSTANT.BOOK.NOT_FOUND);
+      }
+
+      return book;
+    } catch (error) {
+      console.error('Error while retrieving book details:', error);
+      if (error instanceof NotFoundException) throw error;
+
+      throw new InternalServerErrorException(
+        ERROR_CONSTANT.BOOK.RETRIEVE_FALIED,
+      );
     }
-
-    return book;
   }
 
   async updateBook(bookId: number, payload: IUpdateBook) {
     try {
-      const [updatedCount] = await this.bookModel.update(payload, {
-        where: { id: bookId },
-      });
-
-      if (updatedCount === 0) {
-        throw new NotFoundException(ERROR_CONSTANT.BOOK.NOT_FOUND);
+      if (!bookId) {
+        throw new NotFoundException(ERROR_CONSTANT.BOOK.ID_REQUIRED);
       }
 
-      const updatedBook = await this.bookModel.findByPk(bookId);
-      return updatedBook;
+      const [updatedCount, updatedBooks] = await this.bookModel.update(
+        payload,
+        {
+          where: { id: bookId },
+          returning: true,
+        },
+      );
+
+      if (updatedCount === 0)
+        throw new NotFoundException(ERROR_CONSTANT.BOOK.NOT_FOUND);
+
+      return updatedBooks[0];
     } catch (error) {
       console.error('Error while updating book:', error);
+
+      if (error instanceof NotFoundException) throw error;
+
       throw new InternalServerErrorException(
         ERROR_CONSTANT.BOOK.UPDATE_DETAILS_FAILED,
       );
@@ -67,7 +112,7 @@ export class BookService {
 
   async deleteBook(bookId: number) {
     if (!bookId) {
-      throw new BadRequestException('Book ID is required');
+      throw new BadRequestException(ERROR_CONSTANT.BOOK.ID_REQUIRED);
     }
 
     const transaction = await this.bookModel.sequelize.transaction();
@@ -87,10 +132,7 @@ export class BookService {
 
       console.error(`Error while deleting book with ID ${bookId}:`, error);
 
-      if (
-        error instanceof NotFoundException ||
-        error instanceof BadRequestException
-      ) {
+      if (error instanceof BadRequestException) {
         throw error;
       }
 

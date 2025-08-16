@@ -5,6 +5,7 @@ import {
   Delete,
   Get,
   Param,
+  ParseIntPipe,
   Post,
   Put,
   Req,
@@ -23,8 +24,9 @@ export class BookController {
 
   @ResponseMessage(RESPONSE_CONSTANT.BOOK.ADD_SUCCESS)
   @Post('')
-  async addBook(@Body() payload: CreateBookDto) {
-    return await this.bookService.createBook(payload);
+  async createBook(@Req() req: Request, @Body() payload: CreateBookDto) {
+    const userId = req?.currentUser.id;
+    return await this.bookService.createBook(payload, userId);
   }
 
   @ResponseMessage(RESPONSE_CONSTANT.BOOK.RETRIEVE_SUCCESS)
@@ -41,14 +43,14 @@ export class BookController {
 
   @ResponseMessage(RESPONSE_CONSTANT.BOOK.RETRIEVE_SUCCESS)
   @Get('/:bookId')
-  async getBookDetails(@Param('bookId') bookId: number) {
+  async getBookDetails(@Param('bookId', ParseIntPipe) bookId: number) {
     return await this.bookService.getBookDetails(bookId);
   }
 
   @ResponseMessage(RESPONSE_CONSTANT.BOOK.UPDATE_SUCCESS)
   @Put('/:bookId')
   async updateBook(
-    @Param('bookId') bookId: number,
+    @Param('bookId', ParseIntPipe) bookId: number,
     @Body() payload: UpdateBookDto,
   ) {
     return await this.bookService.updateBook(bookId, payload);
@@ -56,7 +58,7 @@ export class BookController {
 
   @ResponseMessage(RESPONSE_CONSTANT.BOOK.DELETE_SUCCESS)
   @Delete('/:bookId')
-  async deleteBook(@Param('bookId') bookId: number) {
+  async deleteBook(@Param('bookId', ParseIntPipe) bookId: number) {
     return await this.bookService.deleteBook(bookId);
   }
 }

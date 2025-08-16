@@ -36,6 +36,7 @@ export const ERROR_CONSTANT = {
     SHARE_FAILED: 'Failed to share book, please try again',
     NOT_FOUND: 'Book not found',
     RETRIEVE_FALIED: 'Failed to retrieve books. Please try again later.',
+    ID_REQUIRED: 'Book ID is required.',
   },
   COLLECTION: {
     CREATE_FAILED: 'Failed to create book collection',

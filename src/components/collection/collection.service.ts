@@ -1,3 +1,4 @@
+import { ERROR_CONSTANT } from './../../common/constants/error.constant';
 import {
   BadRequestException,
   Injectable,
@@ -7,7 +8,6 @@ import {
 import { InjectModel } from '@nestjs/sequelize';
 import { CollectionModel } from './model/collection.model';
 import { BookModel } from '../book/model/book.model';
-import { ERROR_CONSTANT } from '../../common/constants/error.constant';
 import { ICreateCollection, IUpdateCollection } from './interface';
 // import { VISIBILITY } from '../../common/enum/collection';
 
@@ -25,6 +25,10 @@ export class CollectionService {
     collectionData: ICreateCollection,
     bookIds: number[],
   ) {
+    if (!userId) {
+      throw new BadRequestException(ERROR_CONSTANT.USER.NOT_FOUND);
+    }
+
     const transaction = await this.collectionModel.sequelize.transaction();
 
     try {
@@ -59,7 +63,10 @@ export class CollectionService {
       await transaction.rollback();
       console.error('Error while creating collection:', error);
 
-      if (error instanceof NotFoundException) {
+      if (
+        error instanceof NotFoundException ||
+        error instanceof BadRequestException
+      ) {
         throw error;
       }
       throw new InternalServerErrorException(
@@ -73,6 +80,14 @@ export class CollectionService {
     collectionId: number,
     bookIds: number[],
   ) {
+    if (!userId) {
+      throw new BadRequestException(ERROR_CONSTANT.USER.NOT_FOUND);
+    }
+
+    if (!collectionId) {
+      throw new BadRequestException(ERROR_CONSTANT.COLLECTION.NOT_FOUND);
+    }
+
     const transaction = await this.collectionModel.sequelize.transaction();
 
     try {
@@ -140,7 +155,16 @@ export class CollectionService {
     collectionId: number,
     bookIds: number[],
   ) {
+    if (!userId) {
+      throw new BadRequestException(ERROR_CONSTANT.USER.NOT_FOUND);
+    }
+
+    if (!collectionId) {
+      throw new BadRequestException(ERROR_CONSTANT.COLLECTION.NOT_FOUND);
+    }
+
     const transaction = await this.collectionModel.sequelize.transaction();
+
     try {
       const [collection, books] = await Promise.all([
         this.collectionModel.findOne({
@@ -184,6 +208,10 @@ export class CollectionService {
 
   async getMyCollections(userId: number) {
     try {
+      if (!userId) {
+        throw new BadRequestException(ERROR_CONSTANT.USER.NOT_FOUND);
+      }
+
       const collection = await this.collectionModel.findAll({
         where: {
           userId,
@@ -205,6 +233,14 @@ export class CollectionService {
     payload: IUpdateCollection,
   ) {
     try {
+      if (!userId) {
+        throw new BadRequestException(ERROR_CONSTANT.USER.NOT_FOUND);
+      }
+
+      if (!collectionId) {
+        throw new BadRequestException(ERROR_CONSTANT.COLLECTION.NOT_FOUND);
+      }
+
       const [rowsUpdated, [updatedCollection]] =
         await this.collectionModel.update(payload, {
           where: {
@@ -235,6 +271,14 @@ export class CollectionService {
   async shareCollection() {}
 
   async deleteCollection(userId: number, collectionId: number) {
+    if (!userId) {
+      throw new BadRequestException(ERROR_CONSTANT.USER.NOT_FOUND);
+    }
+
+    if (!collectionId) {
+      throw new BadRequestException(ERROR_CONSTANT.COLLECTION.NOT_FOUND);
+    }
+
     try {
       const rowsDeleted = await this.collectionModel.destroy({
         where: {
